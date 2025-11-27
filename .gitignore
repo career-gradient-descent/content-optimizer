@@ -1,0 +1,22 @@
+### Python ###
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# Virtual environment
+.venv/
+
+### Content Optimizer ###
+
+# Output (generated PDFs and tex)
+output/
+
+# Career profile (personal data)
+career.md
+canon.md
+identity.md
+
+# Opportunities, targets, job-specific content
+opportunities/

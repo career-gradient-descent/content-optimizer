@@ -1,0 +1,26 @@
+[project]
+name = "content-optimizer-cli"
+version = "0.1.0"
+description = "Career content generation toolkit"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "click>=8.3.1",
+    "jinja2>=3.1.6",
+    "pydantic>=2.12.5",
+    "pylatex>=1.4.2",
+    "pyyaml>=6.0.3",
+    "typer>=0.20.0",
+]
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.ty.environment]
+python-version = "3.13"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.6",
+    "ty>=0.0.1a28",
+]
