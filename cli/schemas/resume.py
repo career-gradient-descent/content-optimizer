@@ -22,19 +22,21 @@ class Education(BaseModel):
 
 
 class Experience(BaseModel):
-    company     : str
-    title       : str
-    dates       : str
-    location    : str | None    = None
-    bullets     : list[str]     = Field(min_length=1)
+    company         : str
+    company_url     : str | None        = None
+    company_tagline : str | None        = None
+    title           : str
+    dates           : str
+    location        : str | None        = None
+    bullets         : list[str]         = Field(min_length=1)
 
 
 class Project(BaseModel):
     name        : str
+    url         : str | None        = None
     description : str | None        = None
     tech        : str | None        = None
     dates       : str | None        = None
-    link        : str | None        = None
     bullets     : list[str] | None  = None
 
 

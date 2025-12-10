@@ -1,7 +1,7 @@
 %-------------------------
 % Resume in LaTeX
-% Author : Jake Gutierrez
-% Taken From: https://github.com/jakegut/resume
+% Author : Urav Maniar
+% Based off of: https://github.com/jakegut/resume
 % License : MIT
 %------------------------
 
@@ -158,7 +158,7 @@
     <@ for job in experience @>
     \resumeSubheading
       {<<job.title|escape_latex>>}{<<job.dates|escape_latex>>}
-      {<<job.company|escape_latex>>}{<<job.location|default("", true)|escape_latex>>}
+      {<@ if job.company_url @>\href{<<job.company_url>>}{<<job.company|escape_latex>>}<@ else @><<job.company|escape_latex>><@ endif @><@ if job.company_tagline @> $|$ <<job.company_tagline|escape_latex>><@ endif @>}{<<job.location|default("", true)|escape_latex>>}
       \resumeItemListStart
         <@ for bullet in job.bullets @>
         \resumeItem{<<bullet|escape_latex>>}
@@ -174,7 +174,7 @@
     \resumeSubHeadingListStart
       <@ for project in projects @>
       \resumeProjectHeading
-          {\textbf{<<project.name|escape_latex>>}<@ if project.tech @> $|$ \emph{<<project.tech|escape_latex>>}<@ endif @>}{<@ if project.dates @><<project.dates|escape_latex>><@ endif @>}
+          {<@ if project.url @>\href{<<project.url>>}{<@ endif @>\textbf{<<project.name|escape_latex>>}<@ if project.url @>}<@ endif @><@ if project.tech @> $|$ \emph{<<project.tech|escape_latex>>}<@ endif @>}{<@ if project.dates @><<project.dates|escape_latex>><@ endif @>}
           <@ if project.bullets @>
           \resumeItemListStart
             <@ for bullet in project.bullets @>
@@ -183,7 +183,7 @@
           \resumeItemListEnd
           <@ else @>
           \resumeItemListStart
-            \resumeItem{<<project.description|escape_latex>><@ if project.link @> (\href{https://<<project.link>>}{<<project.link>>})<@ endif @>}
+            \resumeItem{<<project.description|escape_latex>>}
           \resumeItemListEnd
           <@ endif @>
       <@ endfor @>

@@ -6,9 +6,13 @@ This is a toolkit for producing marketing and sales content for personal brandin
 
 The file `./career.md` (or alternatively at, `./canon.md` or `./identity.md`) contains the comprehensive career profile. This is the "universe of facts" or "a single source of truth" from which all content is derived. In addition to the typical resume content like bio, education, experiences, projects, and skills, it ALSO indludes other details such as interests, passion, philosophy and writing style.
 
-The career profile file is meant to be a lot more detailed than a resume. With at least a page full of in-depth information about every job experience and project. By design, any material you produce must be a curated selection from the career profile - depending on the opportubity.
+The career profile file is meant to be a lot more detailed than a resume. With at least a page full of in-depth information about every job experience and project. By design, any material you produce must be a curated selection from the career profile - depending on the opportunity.
 
-You also have some creative freedom to strategically emphasize, filter and alter various parts from the career profile to a reasonable degree. Be smart about what piece of content can be modified how much
+## Resume Optimization Philosophy
+
+Generate resumes that appear naturally written while being strategically optimized for both ATS systems and human recruiters. The recruiter should see a strong, well-rounded candidate whose background aligns with the role - not a document obviously tailored to match a job description.
+
+Draw from the career profile intelligently. You have creative freedom to emphasize, reframe, and reasonably extrapolate from the source material. The goal is producing what the candidate would write themselves if they had perfect knowledge of what works, not rigid transcription of facts.
 
 ## Repository Structure
 

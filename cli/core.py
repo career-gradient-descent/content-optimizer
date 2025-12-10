@@ -13,6 +13,13 @@ from cli.schemas import schemas
 LATEX_DOCKER_IMAGE = "texlive/texlive:latest"
 
 
+def _escape_latex_with_pipe_fix(text: str) -> str:
+    """ Escape LaTeX special characters and convert | to $|$ for proper rendering. """
+    escaped = escape_latex(text)
+    # Replace standalone | with $|$ (LaTeX math mode pipe for proper rendering)
+    return escaped.replace("|", "$|$")
+
+
 def populate_jinja_template(data: dict, entity: str, template: str = "primary") -> str:
     """ Validate data and populate the LaTeX Jinja template for the given entity. """
 
@@ -29,7 +36,7 @@ def populate_jinja_template(data: dict, entity: str, template: str = "primary") 
         comment_start_string="<#",
         comment_end_string="#>",
     )
-    env.filters["escape_latex"] = escape_latex
+    env.filters["escape_latex"] = _escape_latex_with_pipe_fix
 
     return env.get_template(f"{template}.tex.j2").render(validated.model_dump())
 
