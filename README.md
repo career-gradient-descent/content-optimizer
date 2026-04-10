@@ -50,13 +50,13 @@ pip install -e .
 
 ```bash
 # Generate resume
-uv run python -m cli render resume opportunities/example.yaml
+uv run python -m cli render resume output/example/resume.yaml
 
 # Generate cover letter
-uv run python -m cli render cover-letter opportunities/example.yaml
+uv run python -m cli render cover-letter output/example/cover-letter.yaml
 
 # Recompile after editing the .tex file
-uv run python -m cli re-render output/example.tex
+uv run python -m cli re-render output/example/resume.tex
 ```
 
 _(If using pip instead of uv: same commands, just drop the `uv run` prefix)_

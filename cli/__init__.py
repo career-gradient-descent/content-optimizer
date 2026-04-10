@@ -6,4 +6,4 @@ ROOT            = Path(__file__).parent.parent
 TEMPLATE_DIR    = ROOT / "templates"
 OUTPUT_DIR      = ROOT / "output"
 
-__all__ = ["TEMPLATE_DIR", "OUTPUT_DIR"]
+__all__ = ["OUTPUT_DIR", "TEMPLATE_DIR"]

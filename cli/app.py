@@ -6,11 +6,14 @@ from typing import Annotated
 import typer
 import yaml
 
-from cli import OUTPUT_DIR
 from cli.core import compile_tex, populate_jinja_template
 
-app         = typer.Typer(help="Career content generation toolkit")
-render_app  = typer.Typer(help="Render content from YAML")
+app = typer.Typer(
+    help="Career content generation toolkit",
+    pretty_exceptions_short=True,
+    pretty_exceptions_show_locals=False,
+)
+render_app = typer.Typer(help="Render content from YAML")
 
 app.add_typer(render_app, name="render")
 
@@ -18,7 +21,7 @@ app.add_typer(render_app, name="render")
 def _render(entity: str, file: Path, template: str, output: Path | None) -> None:
     """ Shared render logic for all entities. """
 
-    pdf: Path = (output or OUTPUT_DIR / f"{file.stem}.pdf").resolve()
+    pdf: Path = (output or file.parent / f"{file.stem}.pdf").resolve()
     tex: Path = pdf.with_suffix(".tex")
     pdf.parent.mkdir(parents=True, exist_ok=True)
 
@@ -60,7 +63,7 @@ def re_render(
     compile_tex(tex)
 
     src_pdf = tex.with_suffix(".pdf")
-    dst_pdf = (output or OUTPUT_DIR / f"{file.stem}.pdf").resolve()
+    dst_pdf = (output or file.parent / f"{file.stem}.pdf").resolve()
 
     if src_pdf != dst_pdf:
         dst_pdf.parent.mkdir(parents=True, exist_ok=True)

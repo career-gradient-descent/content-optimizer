@@ -19,7 +19,7 @@ Draw from the career profile intelligently. You have creative freedom to emphasi
 ```
 ./
 ├── career.md                      # Career profile - source of truth
-├── opportunities/                 # Job-specific YAML files
+├── opportunities/                 # Opportunity inputs (read-only)
 │
 ├── cli/                           # Python CLI package
 │   ├── schemas/
@@ -36,7 +36,11 @@ Draw from the career profile intelligently. You have creative freedom to emphasi
 │       ├── primary.tex.j2
 │       └── original/
 │
-└── output/                        # Generated PDFs and TEX files
+└── output/                        # Generated artifacts, per opportunity
+    └── <slug>/                    # Mirrors opportunity name
+        ├── resume.yaml
+        ├── resume.tex
+        └── resume.pdf
 ```
 
 ## Content Types
@@ -54,22 +58,22 @@ The user will specify:
 
 Your job:
 1. Read: `career.md` + opportunity + `./cli/schemas/<entity>.py` + `./templates/<entity>/<template>.tex.j2`
-2. Produce: YAML matching the schema → save to `./opportunities/<name>.yaml`
+2. Produce: YAML matching the schema → save to `./output/<slug>/resume.yaml`
 3. Render: Run CLI command
-4. Validate: Check generated PDF in `./output/`, iterate on `.tex` if needed
+4. Validate: Read the generated PDF in `./output/<slug>/`, iterate on `.tex` if needed
 
 ```zsh
 # Render YAML → PDF
-uv run python -m cli render resume <yaml> [-t template] [-o output.pdf]
-uv run python -m cli render cover-letter <yaml> [-t template] [-o output.pdf]
+uv run python -m cli render resume output/<slug>/resume.yaml [-t template]
+uv run python -m cli render cover-letter output/<slug>/cover-letter.yaml [-t template]
 
 # Re-compile after manual .tex edits
-uv run python -m cli re-render <tex> [-o output.pdf]
+uv run python -m cli re-render output/<slug>/resume.tex
 ```
 
 Defaults:
 - `-t` defaults to `primary`
-- `-o` defaults to `./output/<input_name>.pdf`
+- `-o` defaults to next to the input file
 
 ### Freeform (Text/Markdown)
 
