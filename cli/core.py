@@ -39,6 +39,8 @@ def populate_jinja_template(data: dict, entity: str, template: str = "primary") 
         variable_end_string     =">>",
         comment_start_string    ="<#",
         comment_end_string      ="#>",
+        trim_blocks             =True,
+        lstrip_blocks           =True,
     )
     env.filters["escape_latex"] = _escape_latex_with_pipe_fix
 
