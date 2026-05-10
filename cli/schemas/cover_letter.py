@@ -1,9 +1,7 @@
 """ Cover letter schema (placeholder). """
 
-from pydantic import BaseModel
+from cli.schemas import Schema
 
 
-class CoverLetterSchema(BaseModel):
+class CoverLetterSchema(Schema, extra="allow"):
     """ Placeholder schema - accepts any fields for now. """
-
-    model_config = {"extra": "allow"}

@@ -42,21 +42,18 @@ pip install -e .
 
 **With Claude Code (recommended):**
 
-1. Drop an opportunity file in `opportunities/` - job description, role details, whatever
+1. Create an opportunity folder under `opportunities/<slug>/` with a `job-description.md` (and optional `research.md`, supporting material)
 2. Ask Claude to generate content for it
-3. Review the PDF in `output/`
+3. Review the PDF in `opportunities/<slug>/artifacts/`
 
 **Manual:**
 
 ```bash
-# Generate resume
-uv run python -m cli render resume output/example/resume.yaml
+# Generate PDF from YAML (entity inferred from filename: resume.yaml, cover-letter.yaml)
+uv run python -m cli render opportunities/example/artifacts/resume.yaml
 
-# Generate cover letter
-uv run python -m cli render cover-letter output/example/cover-letter.yaml
-
-# Recompile after editing the .tex file
-uv run python -m cli re-render output/example/resume.tex
+# Recompile after editing the .tex file (same command, just pass the .tex)
+uv run python -m cli render opportunities/example/artifacts/resume.tex
 ```
 
 _(If using pip instead of uv: same commands, just drop the `uv run` prefix)_

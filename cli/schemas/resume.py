@@ -1,27 +1,42 @@
 """ Resume schema. """
 
-from pydantic import BaseModel, Field
+from typing import Literal
+
+from pydantic import Field, field_validator
+
+from cli.schemas import Schema
+
+ATS_KEYWORDS_WORD_LIMIT = 13
 
 
-class Basics(BaseModel):
+class Basics(Schema):
     name            : str
     ats_optimization: str | None = None
 
+    @field_validator("ats_optimization")
+    @classmethod
+    def _within_word_limit(cls, v: str | None) -> str | None:
+        if v and (n := len(v.split())) > ATS_KEYWORDS_WORD_LIMIT:
+            raise ValueError(f"ats_optimization must be ≤{ATS_KEYWORDS_WORD_LIMIT} words, got {n}")
+        return v
 
-class Link(BaseModel):
+
+class Link(Schema):
     url     : str
     display : str
 
 
-class Education(BaseModel):
-    institution : str
-    degree      : str
-    dates       : str
-    location    : str | None        = None
-    details     : list[str] | None  = None
+class Education(Schema):
+    institution     : str
+    institution_url : str | None        = None
+    degree          : str
+    degree_url      : str | None        = None
+    dates           : str
+    location        : str | None        = None
+    details         : list[str] | None  = None
 
 
-class Experience(BaseModel):
+class Experience(Schema):
     company         : str
     company_url     : str | None        = None
     company_tagline : str | None        = None
@@ -31,7 +46,7 @@ class Experience(BaseModel):
     bullets         : list[str]         = Field(min_length=1)
 
 
-class Project(BaseModel):
+class Project(Schema):
     name        : str
     url         : str | None        = None
     description : str | None        = None
@@ -40,7 +55,7 @@ class Project(BaseModel):
     bullets     : list[str] | None  = None
 
 
-class Certification(BaseModel):
+class Certification(Schema):
     name            : str
     issuer          : str
     date            : str
@@ -48,16 +63,28 @@ class Certification(BaseModel):
     verification_url: str | None = None
 
 
-class Meta(BaseModel):
+class Publication(Schema):
+    title       : str
+    url         : str | None = None
+    authors     : str
+    author_self : str | None = None  # substring of `authors` to bold (your own name)
+    venue       : str
+    year        : str
+    status      : Literal["Preprint", "Under review", "Accepted", "In press", "To appear"] | None = None
+    note        : str | None = None  # one-line contribution summary
+
+
+class Meta(Schema):
     subject     : str | None = None
     keywords    : str | None = None
 
 
-class ResumeSchema(BaseModel, extra="forbid"):
+class ResumeSchema(Schema, extra="forbid"):
     basics          : Basics
     links           : list[Link] | None             = None
     summary         : str | None                    = None
     education       : list[Education]               = Field(min_length=1)
+    publications    : list[Publication] | None      = None
     experience      : list[Experience]              = Field(min_length=1)
     projects        : list[Project] | None          = None
     skills          : dict[str, str] | None         = None

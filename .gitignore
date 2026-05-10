@@ -8,15 +8,18 @@ __pycache__/
 # Virtual environment
 .venv/
 
-### Content Optimizer ###
+# Ruff stuff:
+.ruff_cache/
 
-# Output (generated PDFs and tex)
-output/
+### Content Optimizer ###
 
 # Career profile (personal data)
 career.md
-canon.md
-identity.md
 
-# Opportunities, targets, job-specific content
-opportunities/
+# Calibrated artifact baselines (personal data)
+defaults/*
+!defaults/.gitkeep
+
+# Opportunities — JD, research, supporting material, and generated artifacts
+opportunities/*
+!opportunities/.gitkeep

@@ -5,23 +5,43 @@ import sys
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
-from pydantic import BaseModel as Schema
 from pylatex.utils import escape_latex
 
 from cli import TEMPLATE_DIR
-from cli.schemas import schemas
+from cli.schemas import Schema, schemas
 
 LATEX_DOCKER_IMAGE = "texlive/texlive:latest"
+
+# Custom Jinja delimiters so the templating syntax doesn't conflict with LaTeX's {}.
+JINJA_LATEX_DELIMITERS = {
+    "block_start_string"    : "<@",
+    "block_end_string"      : "@>",
+    "variable_start_string" : "<<",
+    "variable_end_string"   : ">>",
+    "comment_start_string"  : "<#",
+    "comment_end_string"    : "#>",
+}
 
 
 class CompilationError(Exception):
     """LaTeX compilation failed."""
 
 
-def _escape_latex_with_pipe_fix(text: str) -> str:
-    """ Escape LaTeX special characters and convert | to $|$ for proper rendering. """
-    escaped = escape_latex(text)
-    return escaped.replace("|", "$|$")
+def _escape_latex(text: str) -> str:
+    """ Escape LaTeX special characters and apply prose-friendly rendering fixes. """
+    return (
+        escape_latex(text)
+        .replace("|", "$|$")                        # mathmode pipe; pylatex's | renders awkwardly
+        .replace(r"\textasciitilde{}", r"$\sim$")   # CM tilde is a high diacritic; $\sim$ is the prose glyph
+        .replace("{-}", "-")                        # pylatex wraps - to block dash ligatures; resume prose has no -- or ---
+    )
+
+
+def _bold_substring(text: str, substring: str | None) -> str:
+    """ Wrap occurrences of `substring` in \\textbf{}. Used to bold the author's own name within an authors list. Both inputs must already be latex-escaped; no escaping is performed here. """
+    if not substring:
+        return text
+    return text.replace(substring, f"\\textbf{{{substring}}}")
 
 
 def populate_jinja_template(data: dict, entity: str, template: str = "primary") -> str:
@@ -32,17 +52,13 @@ def populate_jinja_template(data: dict, entity: str, template: str = "primary") 
     template_dir: Path          = TEMPLATE_DIR / entity
 
     env = Environment(
-        loader                  =FileSystemLoader(template_dir),
-        block_start_string      ="<@",
-        block_end_string        ="@>",
-        variable_start_string   ="<<",
-        variable_end_string     =">>",
-        comment_start_string    ="<#",
-        comment_end_string      ="#>",
-        trim_blocks             =True,
-        lstrip_blocks           =True,
+        loader          =FileSystemLoader(template_dir),
+        trim_blocks     =True,
+        lstrip_blocks   =True,
+        **JINJA_LATEX_DELIMITERS,
     )
-    env.filters["escape_latex"] = _escape_latex_with_pipe_fix
+    env.filters["escape_latex"] = _escape_latex
+    env.filters["bold_substring"] = _bold_substring
 
     return env.get_template(f"{template}.tex.j2").render(validated.model_dump())
 
@@ -51,11 +67,10 @@ def _extract_log_errors(log: Path) -> str:
     """Extract error lines from a pdflatex log file."""
     if not log.exists():
         return ""
-    lines = []
-    for line in log.read_text(errors="replace").splitlines():
-        if line.startswith("! ") or line.startswith("l."):
-            lines.append(line)
-    return "\n".join(lines)
+    return "\n".join(
+        line for line in log.read_text(errors="replace").splitlines()
+        if line.startswith(("! ", "l."))
+    )
 
 
 def compile_tex(tex: Path) -> Path:

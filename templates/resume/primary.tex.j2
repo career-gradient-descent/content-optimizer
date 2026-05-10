@@ -11,10 +11,11 @@
 \usepackage[empty]{fullpage}
 \usepackage{titlesec}
 \usepackage{marvosym}
-\usepackage[usenames,dvipsnames]{color}
+\usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{verbatim}
 \usepackage{enumitem}
-\usepackage[hidelinks]{hyperref}
+\usepackage[colorlinks=true, allcolors={blue!25!black}]{hyperref}
+\usepackage{pdfrender}
 \hypersetup{
     pdftitle={<<basics.name|escape_latex>> Resume},
     pdfauthor={<<basics.name|escape_latex>>},
@@ -27,6 +28,7 @@
 \usepackage{fancyhdr}
 \usepackage[english]{babel}
 \usepackage{tabularx}
+\usepackage{needspace}
 \input{glyphtounicode}
 
 
@@ -72,12 +74,10 @@
 %-------------------------
 % Custom commands
 
-% ATS-optimized invisible text using PDF rendering mode 3 (zero dimensions)
-\newcommand{\atsKeywords}[1]{%
-  \ifx\relax#1\relax\else% Only if argument is not empty
-    \smash{\makebox[0pt]{\pdfliteral page{q 3 Tr}#1\pdfliteral page{Q}}}%
-  \fi%
-}
+% Invisible-but-extractable text via PDF rendering mode 3.
+% \parbox allows internal line wrapping; \rlap zeros width, \smash zeros height,
+% so the block contributes no layout footprint regardless of remaining page space.
+\newcommand{\atsKeywords}[1]{\smash{\rlap{\pdfrender{TextRenderingMode=3}\parbox{\linewidth}{#1}}}}
 
 \newcommand{\resumeItem}[1]{
   \item\small{
@@ -86,6 +86,7 @@
 }
 
 \newcommand{\resumeSubheading}[4]{
+  \needspace{5\baselineskip}%
   \vspace{2pt}\item
     \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
       \textbf{#1} & #2 \\
@@ -132,7 +133,6 @@
 <@ if summary @>
 \section{Summary}
 <<summary|escape_latex>>
-<@ if basics.ats_optimization @>\atsKeywords{ <<basics.ats_optimization|escape_latex>>}<@ endif @>
 <@ endif @>
 
 %-----------EDUCATION-----------
@@ -140,8 +140,8 @@
   \resumeSubHeadingListStart
     <@ for edu in education @>
     \resumeSubheading
-      {<<edu.institution|escape_latex>>}{<<edu.location|default("", true)|escape_latex>>}
-      {<<edu.degree|escape_latex>>}{<<edu.dates|escape_latex>>}
+      {<@ if edu.institution_url @>\href{<<edu.institution_url>>}{<<edu.institution|escape_latex>>}<@ else @><<edu.institution|escape_latex>><@ endif @>}{<<edu.location|default("", true)|escape_latex>>}
+      {<@ if edu.degree_url @>\href{<<edu.degree_url>>}{<<edu.degree|escape_latex>>}<@ else @><<edu.degree|escape_latex>><@ endif @>}{<<edu.dates|escape_latex>>}
       <@ if edu.details @>
       \resumeItemListStart
         <@ for detail in edu.details @>
@@ -151,6 +151,21 @@
       <@ endif @>
     <@ endfor @>
   \resumeSubHeadingListEnd
+
+%-----------PUBLICATIONS-----------
+<@ if publications and publications|length > 0 @>
+\section{Publications}
+  \begin{itemize}[leftmargin=0.15in, label={}]
+    <@ for pub in publications @>
+    \item\small{
+      \textbf{<@ if pub.url @>\href{<<pub.url>>}{<<pub.title|escape_latex>>}<@ else @><<pub.title|escape_latex>><@ endif @>}.
+      <<pub.authors|escape_latex|bold_substring(pub.author_self|escape_latex)>>.
+      \emph{<<pub.venue|escape_latex>>}, <<pub.year|escape_latex>>.<@ if pub.status @>\ <<pub.status|escape_latex>>.<@ endif @><@ if pub.note @>\ <<pub.note|escape_latex>><@ endif @>
+    }
+    \vspace{2pt}
+    <@ endfor @>
+  \end{itemize}
+<@ endif @>
 
 %-----------EXPERIENCE-----------
 \section{Experience}
@@ -217,4 +232,5 @@
 <@ endif @>
 
 %-------------------------------------------
+<@ if basics.ats_optimization @>\atsKeywords{ <<basics.ats_optimization|escape_latex>>}<@ endif @>
 \end{document}

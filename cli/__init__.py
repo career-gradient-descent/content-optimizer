@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-ROOT            = Path(__file__).parent.parent
-TEMPLATE_DIR    = ROOT / "templates"
-OUTPUT_DIR      = ROOT / "output"
+TEMPLATE_DIR = Path(__file__).parent.parent / "templates"
 
-__all__ = ["OUTPUT_DIR", "TEMPLATE_DIR"]
+__all__ = ["TEMPLATE_DIR"]
