@@ -35,9 +35,8 @@ wheels = [
 [[package]]
 name = "content-optimizer-cli"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
-    { name = "click" },
     { name = "jinja2" },
     { name = "pydantic" },
     { name = "pylatex" },
@@ -53,7 +52,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "click", specifier = ">=8.3.1" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pylatex", specifier = ">=1.4.2" },

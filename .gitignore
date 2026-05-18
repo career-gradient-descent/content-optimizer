@@ -8,7 +8,7 @@ __pycache__/
 # Virtual environment
 .venv/
 
-# Ruff stuff:
+# Ruff stuff
 .ruff_cache/
 
 ### Content Optimizer ###

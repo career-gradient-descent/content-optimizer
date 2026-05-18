@@ -5,10 +5,18 @@ import sys
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
-from pylatex.utils import escape_latex
+from pylatex.utils import _latex_special_chars, escape_latex
 
-from cli import TEMPLATE_DIR
 from cli.schemas import Schema, schemas
+
+# Override pylatex's escape map for prose rendering.
+_latex_special_chars |= {
+    "~": r"$\sim$",   # prose glyph instead of \textasciitilde{} diacritic
+    "|": r"$|$",      # mathmode pipe (pylatex doesn't escape pipes)
+    "-": "-",         # pass through (default {-} wrapping kerns oddly)
+}
+
+TEMPLATE_DIR = Path(__file__).parent.parent / "templates"
 
 LATEX_DOCKER_IMAGE = "texlive/texlive:latest"
 
@@ -25,16 +33,6 @@ JINJA_LATEX_DELIMITERS = {
 
 class CompilationError(Exception):
     """LaTeX compilation failed."""
-
-
-def _escape_latex(text: str) -> str:
-    """ Escape LaTeX special characters and apply prose-friendly rendering fixes. """
-    return (
-        escape_latex(text)
-        .replace("|", "$|$")                        # mathmode pipe; pylatex's | renders awkwardly
-        .replace(r"\textasciitilde{}", r"$\sim$")   # CM tilde is a high diacritic; $\sim$ is the prose glyph
-        .replace("{-}", "-")                        # pylatex wraps - to block dash ligatures; resume prose has no -- or ---
-    )
 
 
 def _bold_substring(text: str, substring: str | None) -> str:
@@ -57,7 +55,7 @@ def populate_jinja_template(data: dict, entity: str, template: str = "primary") 
         lstrip_blocks   =True,
         **JINJA_LATEX_DELIMITERS,
     )
-    env.filters["escape_latex"] = _escape_latex
+    env.filters["escape_latex"] = escape_latex
     env.filters["bold_substring"] = _bold_substring
 
     return env.get_template(f"{template}.tex.j2").render(validated.model_dump())
@@ -76,6 +74,7 @@ def _extract_log_errors(log: Path) -> str:
 def compile_tex(tex: Path) -> Path:
     """Compile LaTeX to PDF via Docker."""
 
+    tex = tex.resolve()  # docker volume mount requires absolute host path
     pdf = tex.with_suffix(".pdf")
 
     result = subprocess.run(
@@ -85,6 +84,7 @@ def compile_tex(tex: Path) -> Path:
         ],
         capture_output=True,
         text=True,
+        check=False
     )
 
     log_errors = _extract_log_errors(tex.with_suffix(".log"))
