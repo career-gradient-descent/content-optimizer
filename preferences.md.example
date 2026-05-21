@@ -1,0 +1,33 @@
+# Preferences (template)
+
+> **For the LLM helping populate this:** walk through the sections below in order, one at a time, conversationally. Capture the user's answers in their own words. After 1-2 sections are answered, create `preferences.md` at repo root and `Edit` it as more answers come in. Strip this blockquote and all `Ask:` lines on save. If a section doesn't apply, write `(not applicable)` and move on.
+>
+> Scope: tactical context (next 6-12 months) and floors that gate the `assess` skill. Stable identity belongs in `career.md`. Tone: terse, concrete, falsifiable.
+
+## Current situation
+
+Ask: Tactical context for the next 6-12 months. Visa, career-stage transition, market, time-bound constraints.
+
+## Geographic constraints
+
+Ask: Where you can work. Hard nos. Remote tolerance.
+
+## Compensation floor
+
+Ask: Minimum total comp. Currency, cadence, equity/bonus included or not.
+
+## Walk-aways
+
+Ask: What disqualifies an opportunity immediately, regardless of other fit. Concrete dealbreakers, not vague aversions.
+
+## What you want from a role
+
+Ask: What the work needs to offer for it to count as a good fit. If overlap with `career.md > About` is significant, reference it rather than duplicating.
+
+## Your competitive edge
+
+Ask: What kinds of roles you're uniquely well-positioned for. Where your background gives you a real edge versus a typical applicant. Where it does NOT stack well.
+
+## Situational scoring overrides (optional)
+
+Ask: Whether `assess` defaults should be adjusted for your circumstances. Defaults: V weights V1=0.25/V2=0.40/V3=0.20/V4=0.15; P weights P1=0.50/P2=0.30/P3=0.20; Apply if V≥2.0 AND P≥2.0. Only fill if there's a concrete reason to deviate.

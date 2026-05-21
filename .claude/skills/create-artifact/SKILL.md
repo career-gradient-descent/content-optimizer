@@ -34,25 +34,6 @@ For artifacts that go through the PDF pipeline:
 
 Entity is `resume` or `cover-letter`. Defaults: `-t primary`, output next to input file. Compilation uses Docker (texlive/texlive:latest).
 
-## Schema Reference
-
-Read the schema source for exact types. Key non-obvious fields for resume:
-
-- `basics.ats_optimization` (str, optional): Invisible ATS text via `\atsKeywords{}`, PDF rendering mode 3. Placed at end of document. Schema-enforced limit of 13 words.
-- `meta.subject`, `meta.keywords` (str, optional): PDF metadata in `\hypersetup{}`. Invisible.
-- `experience[].company_tagline` (str, optional): After company name, separated by `|`.
-- `experience[].bullets` (list[str], min 1): Required per experience.
-- `skills` (dict[str, str], optional): Category → comma-separated items.
-- `projects[].tech` (str, optional): After project name in italics.
-
-Cover letter schema is currently flexible (`extra="allow"`). Read the template.
-
-## Template Notes
-
-Custom Jinja delimiters (LaTeX `{}` conflict): `<<var>>` for variables, `<@ block @>` for control flow.
-
-Resume section order: Heading → Summary → Education → Publications → Experience → Projects → Licenses & Certifications → Technical Skills → atsKeywords (end of doc). All sections except Education and Experience are conditionally rendered.
-
 ## Strategy
 
-!`cat ${CLAUDE_SKILL_DIR}/resume-strategy.md`
+For resume strategy, read `${CLAUDE_SKILL_DIR}/resume-strategy.md`.

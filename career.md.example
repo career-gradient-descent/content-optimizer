@@ -1,22 +1,44 @@
+# Career Profile (template)
+
+> **For the LLM helping populate this:** this is a deep, multi-turn interview. The richer the file, the better every downstream artifact (resumes, cover letters, assessments). Aim for breadth (cover everything) AND depth (a page or more on each substantive role or project).
+>
+> Iterate through repeating structures (Education, Experience, Projects, Publications): ask about each item one at a time, don't dump the whole list.
+>
+> Create `career.md` at repo root after Identity is answered. `Edit` it eagerly as more sections come in, not at the end. Strip this blockquote and all `Ask:` / instruction lines on save.
+>
+> Tone: first-person, candid, story-led where appropriate. This is the source of truth, not a polished marketing document. Encourage the user to capture what they *owned*, what they *wrestled with*, what they'd *do differently*, what kinds of work they liked or didn't.
+
 # Identity
 
-Name:
-Location:
-Address:
-Email:
-Phone:
-GitHub:
-LinkedIn:
-Website:
-
-# About
+Ask: Name, location, email, phone, GitHub, LinkedIn, other public profiles (Scholar, personal site, Devpost, etc.).
 
 # Education
 
+Iterate per institution. For each: institution + degree + dates + location + GPA/WAM; notable courses as a table (code, name, year, period, grade, mark); highlights (scholarships, research, thesis, hackathons, leadership).
+
 # Experience
+
+Iterate per role. For each: company + role title + dates + location + company type (startup / FAANG / consultancy / etc.) + tech stack + team size and shape. Then per significant project or area within the role: what was owned, what was built, what shipped, what didn't. Press for specific technologies, named systems, scale numbers (latency, throughput, cost, users, instances) where they exist. Capture any written recommendations or endorsements verbatim if shareable.
+
+# Publications
+
+Iterate per publication. For each: title + link + date + authors (your role: sole / lead / contributor) + venue and status + citations + one-paragraph summary of contribution. Skip the section entirely if there are none.
 
 # Projects
 
-# Skills
+Iterate per project. For each: name + link (GitHub / Devpost / live demo) + dates + tech + status (in progress / shipped / archived) + what motivated it + what landed + what didn't + anything that crystallised a design principle for the user.
 
-# Interests
+# About
+
+Multi-turn. This section is the spine of the user's voice for downstream artifacts. Ask one prompt at a time:
+
+- What actually drives your work, beyond the job title? What kind of curiosity is older than any role you've held?
+- Do you have an aesthetic commitment — code as craft, design as art? Concrete examples that prove it.
+- What kind of work do you stop enjoying, and why? What kind do you keep returning to?
+- Distinctions you find yourself making about how you work or want to work. Capture them in the user's own framing.
+- Current intellectual interests — threads you're actively pulling on, even if they haven't paid off yet.
+- Two or three plausible futures you'd be excited about, in order of vibe.
+
+# Early Life
+
+Ask: Formative experiences with the work you do now. When you first encountered it. Anything before formal education that shaped the trajectory. Keep brief.

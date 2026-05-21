@@ -11,7 +11,10 @@ ATS_KEYWORDS_WORD_LIMIT = 13
 
 class Basics(Schema):
     name            : str
-    ats_optimization: str | None = None
+    ats_optimization: str | None = Field(
+        None,
+        description=r"Invisible ATS keyword text rendered at end of document. Extractable by parsers, not visible to humans. Hard-capped at 13 words.",
+    )
 
     @field_validator("ats_optimization")
     @classmethod
@@ -39,7 +42,10 @@ class Education(Schema):
 class Experience(Schema):
     company         : str
     company_url     : str | None        = None
-    company_tagline : str | None        = None
+    company_tagline : str | None        = Field(
+        None,
+        description="Rendered after company name, separated by `|`.",
+    )
     title           : str
     dates           : str
     location        : str | None        = None
@@ -50,7 +56,10 @@ class Project(Schema):
     name        : str
     url         : str | None        = None
     description : str | None        = None
-    tech        : str | None        = None
+    tech        : str | None        = Field(
+        None,
+        description="Rendered after project name in italics, separated by `|`.",
+    )
     dates       : str | None        = None
     bullets     : list[str] | None  = None
 
@@ -75,8 +84,14 @@ class Publication(Schema):
 
 
 class Meta(Schema):
-    subject     : str | None = None
-    keywords    : str | None = None
+    subject     : str | None = Field(
+        None,
+        description=r"PDF metadata `pdfsubject` rendered in \hypersetup{}. Invisible to humans, machine-readable.",
+    )
+    keywords    : str | None = Field(
+        None,
+        description=r"PDF metadata `pdfkeywords` rendered in \hypersetup{}. Invisible to humans, machine-readable.",
+    )
 
 
 class ResumeSchema(Schema, extra="forbid"):
@@ -87,6 +102,9 @@ class ResumeSchema(Schema, extra="forbid"):
     publications    : list[Publication] | None      = None
     experience      : list[Experience]              = Field(min_length=1)
     projects        : list[Project] | None          = None
-    skills          : dict[str, str] | None         = None
+    skills          : dict[str, str] | None         = Field(
+        None,
+        description="Category to comma-separated items. Rendered as labeled lines under Technical Skills.",
+    )
     certifications  : list[Certification] | None    = None
     meta            : Meta | None                   = None

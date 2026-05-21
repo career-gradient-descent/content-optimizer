@@ -61,13 +61,25 @@ The typical flow for an outbound job application:
 
 Steps 3 and 5 are optional refinements. Step 4 is the only essential one once you've pasted the JD.
 
-## Setting yourself up properly
+## Setting yourself up
 
-The output is bounded by the quality of `career.md`. Spend real time on it.
+Two files at repo root drive everything: `career.md` (your durable career profile) and `preferences.md` (tactical context and floors used by the `assess` skill). Both are gitignored personal data; each has a tracked `.example` template.
 
-Write everything down. Every role, every project, every academic mark, every publication, every side endeavor. What you owned. What you wrestled with. What you'd do differently. What types of work you liked, what you didn't. Get philosophical about your trajectory. Go for both breadth (cover everything) and depth (a page or more on each substantive thing).
+The example files are interview-ready. They embed setup instructions for Claude. In a fresh chat:
 
-The richer the source of truth, the less the generated content falls back on stock phrasing, and the less likely you'll see fabricated achievements that don't trace back to anything real.
+```
+Have a look at @career.md.example and help me set up my career file. Iteratively ask me probing questions to make sure we cover all the relevant information.
+```
+
+And separately:
+
+```
+Have a look at @preferences.md.example and help me set up my preferences file.
+```
+
+Each runs as a multi-turn conversation. Claude walks the sections one at a time, creates the file once enough is in place, and edits it as the interview continues.
+
+Depth matters: the output of every downstream artifact is bounded by the quality of `career.md`. Write everything down. Every role, every project, every academic mark, every publication, every side endeavor. What you owned. What you wrestled with. What you'd do differently. What you liked, what you didn't. Go for breadth and depth. The richer the source of truth, the less the generated content falls back on stock phrasing, and the less likely you'll see fabricated achievements.
 
 You'll also want to calibrate baselines. The `create-artifact` skill expects defaults at `defaults/resume.yaml`, `defaults/cover-letter.yaml`, etc. that represent your usual voice, structure, and content selection, rendered cleanly without any opportunity context. Per-opportunity artifacts are tactical modifications of these defaults, not rewrites from scratch. Without calibrated defaults, every resume reads as obviously reverse-engineered from the JD.
 
