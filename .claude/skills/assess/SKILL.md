@@ -3,7 +3,7 @@ name: assess
 description: Score one or more job opportunities (URL, pasted JD, or opportunity folder path) against career.md and preferences.md. Outputs verdict (Apply / Maybe / Skip) with V/P/EV scores and evidence in chat. For triage before deciding whether to pursue.
 argument-hint: <url-or-path-or-paste> [more...]
 disable-model-invocation: true
-allowed-tools: Read WebFetch Glob Grep Bash(python3 *)
+allowed-tools: Read WebSearch WebFetch Glob Grep Bash(python3 *)
 model: opus
 effort: high
 ---

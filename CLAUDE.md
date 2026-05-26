@@ -12,8 +12,9 @@ Each pursuit lives at `opportunities/<slug>/`. Contents are flexible per pursuit
 
 ## CLI
 
-- `co new-opportunity <slug>` — scaffold an opportunity folder (creates `job-description.md`; flags pre-populate frontmatter)
-- `co render <file>` — render YAML→PDF or recompile from TEX. Entity inferred from filename stem (`resume.yaml`, `cover-letter.yaml`).
+- `co new-opportunity <slug>` — scaffold an opportunity folder with an empty `job-description.md`. Optional flags pre-populate frontmatter: `--role`, `--organisation`, `--location`, `--url`, `--ats`, `--comp`.
+- `co fetch-jd <url>` — extract a job description to markdown deterministically (no LLM), printed to stdout. Gives up with a non-zero exit when the page is JS-rendered or yields too little to trust.
+- `co render <file>` — render a YAML artifact to PDF (writing the PDF next to the input), or recompile from a `.tex`. Entity inferred from filename stem (`resume`, `cover-letter`). Optional flag: `-t <template>` (default `primary`).
 
 ## Operating mode
 

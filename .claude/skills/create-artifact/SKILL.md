@@ -32,7 +32,7 @@ For artifacts that go through the PDF pipeline:
 4. Save to `opportunities/<slug>/artifacts/<entity>.yaml`. Render: `uv run co render opportunities/<slug>/artifacts/<entity>.yaml`
 5. Read the generated PDF to validate. If formatting needs adjustment, edit the `.tex` and re-render: `uv run co render opportunities/<slug>/artifacts/<entity>.tex`
 
-Entity is `resume` or `cover-letter`. Defaults: `-t primary`, output next to input file. Compilation uses Docker (texlive/texlive:latest).
+Entity is `resume` or `cover-letter`.
 
 ## Strategy
 

@@ -6,7 +6,8 @@ from typing import Annotated
 import typer
 import yaml
 
-from cli.core import compile_tex, populate_jinja_template
+from cli.core import CompilationError, compile_tex, populate_jinja_template
+from cli.fetch import FetchError, fetch_jd_markdown
 from cli.schemas.job_description import JobDescriptionSchema
 
 app = typer.Typer(
@@ -53,7 +54,11 @@ def render(
         tex : Path = file.with_suffix(".tex")
         tex.parent.mkdir(parents=True, exist_ok=True)
         tex.write_text(populate_jinja_template(yaml.safe_load(file.read_text()), file.stem, template))
-    pdf : Path = compile_tex(tex)
+    try:
+        pdf : Path = compile_tex(tex)
+    except CompilationError as exc:
+        typer.echo(f"render failed: {exc}", err=True)
+        raise typer.Exit(1)
     typer.echo(f"Generated: {pdf}")
 
 
@@ -82,3 +87,15 @@ def new_opportunity(
     jd_path : Path = folder / "job-description.md"
     jd_path.write_text(f"---\n{frontmatter}---\n\n")
     typer.echo(f"Created: {jd_path}")
+
+
+@app.command("fetch-jd")
+def fetch_jd(
+    url: Annotated[str, typer.Argument(help="JD page URL")],
+) -> None:
+    """Extract a job description to markdown (deterministic, no LLM). Prints to stdout."""
+    try:
+        typer.echo(fetch_jd_markdown(url))
+    except FetchError as exc:
+        typer.echo(f"fetch-jd gave up: {exc}", err=True)
+        raise typer.Exit(1)
