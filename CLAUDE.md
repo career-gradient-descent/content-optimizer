@@ -1,20 +1,25 @@
 # Content Optimizer
 
-Toolkit for producing career marketing artifacts (resumes, cover letters, outreach) tailored per opportunity.
+Toolkit for producing career marketing artifacts (resumes, cover letters, outreach) tailored per opportunity. User-facing overview: `README.md`.
 
 ## The opportunity is the unit
 
-Each pursuit lives at `opportunities/<slug>/`. Contents are flexible per pursuit type — job opportunities typically include job-description.md (with YAML frontmatter), optional research.md, and supporting material. Generated content goes in an artifacts/ subfolder. Slugs can nest (e.g., opportunities/google/sre-g1/).
+Each pursuit lives at `opportunities/<slug>/`. It typically holds `job-description.md` (YAML frontmatter + body), an optional `research.md`, and an `artifacts/` subfolder for generated content. Slugs can nest (`opportunities/google/sre-g1/`).
 
 ## Source of truth
 
-`career.md` is the full candidate profile. Every generated artifact draws selectively from it.
+- `career.md`: the full candidate profile; every artifact draws selectively from it.
+- `preferences.md`: floors, walk-aways, and situational scoring used in triage.
+- `tracker.xlsx`: application state. Read it via `co tracker` (read-only); the user maintains it by hand.
+- `.claude/rules/*.md`: voice and anti-patterns, auto-loaded.
 
 ## CLI
 
-- `co new-opportunity <slug>` — scaffold an opportunity folder with an empty `job-description.md`. Optional flags pre-populate frontmatter: `--role`, `--organisation`, `--location`, `--url`, `--ats`, `--comp`.
-- `co fetch-jd <url>` — extract a job description to markdown deterministically (no LLM), printed to stdout. Gives up with a non-zero exit when the page is JS-rendered or yields too little to trust.
-- `co render <file>` — render a YAML artifact to PDF (writing the PDF next to the input), or recompile from a `.tex`. Entity inferred from filename stem (`resume`, `cover-letter`). Optional flag: `-t <template>` (default `primary`).
+Deterministic `co` commands: `new-opportunity`, `fetch-jd`, `render`, `tracker`, `archive`. Setting up an opportunity composes two of them: `new-opportunity` scaffolds the folder, `fetch-jd` pulls the JD body. Usage, flags, behavior, and the setup cases live in `cli/README.md`; read it before invoking, or run `co <command> --help`.
+
+## Pipeline
+
+The heavy stages are user-invoked skills, deliberately explicit (slash only): `/assess` (triage), `/research-opportunity`, `/create-artifact`, `/vet`. Suggest them when apt; the user triggers them. Everything else (application Q&A, outreach, emails, pipeline queries against the tracker) is ordinary conversation grounded in the source-of-truth files above.
 
 ## Operating mode
 

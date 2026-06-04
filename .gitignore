@@ -16,3 +16,6 @@ opportunities/*
 
 **/*.local.md
 .claude/local/
+
+### Editor ###
+.vscode/

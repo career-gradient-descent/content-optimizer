@@ -6,86 +6,95 @@
 
 </div>
 
-Toolkit for producing per-opportunity career-marketing content. Resumes, cover letters, outreach, application Q&A. No copy-pasting; no manual rewrites. A small Python CLI handles deterministic rendering (YAML to Jinja+LaTeX to PDF). Claude Code skills handle the stochastic work: triage, drafting, stress-testing.
+A per-opportunity career-marketing pipeline for resumes, cover letters, outreach, and application Q&A. Half of it is deterministic: YAML schemas, Jinja+LaTeX, ATS-aware PDF rendering, a small Python CLI you can audit line by line. Half is stochastic: Claude Code skills that triage opportunities, draft from your profile, and stress-test the result before you send it.
 
 ## The model
 
-Most career-content AI invents the substance. It generates a resume from a thin profile; writes a cover letter from a few bullet points. This toolkit refuses that. Your career, your voice, your floors and walk-aways are inputs you write once, by hand, with care. The workflows here are reductive: filter, polish, probe, project that pre-articulated substance onto a specific opportunity. They never manufacture voice; they shadow yours.
+Most career-content AI invents the substance. Hand it a thin profile and it manufactures a resume; give it three bullet points and it writes you a voice you don't have. This toolkit refuses that.
 
-The investment is front-loaded. Half a workday on `career.md` and `preferences.md` is realistic; cutting that corner is the single failure mode that produces shallow artifacts no amount of downstream prompting will fix. Done well, per-opportunity friction drops to near-zero, and the benefit compounds: as you nudge your context files to better model your actual decision-making, more workflows can be delegated over time without losing authenticity.
+Your career, your voice, your floors and walk-aways are **inputs you write once, by hand, with care.** Everything downstream is reductive: it filters, polishes, probes, and projects that pre-articulated substance onto a specific opportunity. It never fabricates a metric, never inflates a title, never invents a story. It shadows you.
+
+> ### It reduces your effort, not your authenticity.
+
+That's the whole thesis. The pipeline is a state machine you can read end to end, and what it surfaces is *your* material, approximated under each opportunity.
+
+The cost is front-loaded and real. Half a workday on `career.md` is the honest figure, and skipping it is the one failure mode that yields shallow, obviously reverse-engineered output no prompt can save. Do it properly and per-opportunity friction approaches zero, then keeps compounding as you tune your context files to model your own judgment and hand more of the loop over without losing a thing.
+
+## The pipeline
+
+> **`/assess` → set up → `/research-opportunity` → `/create-artifact` → `/vet` → submit**
+
+| Stage | You say | Result |
+|---|---|---|
+| **Triage** | `/assess <url, text, or several>` | Apply / Maybe / Skip per JD, scored against your profile |
+| **Set up** | *"set up an opportunity for `<url>`"* | Folder scaffolded, JD pulled in |
+| **Research** *(opt.)* | `/research-opportunity <folder>` | `research.md`: company, team, ATS, people |
+| **Generate** | `/create-artifact resume <folder>` | Tailored resume or cover letter, YAML → PDF |
+| **Vet** *(opt.)* | `/vet <slug>` | Parallel ATS, recruiter-funnel, and gap reports |
+
+JD extraction is deterministic where the page allows. JS-heavy ATS pages (much of Workday, Ashby) you paste by hand.
+
+Everything around the edges is plain conversation, grounded in the same context files: application Q&A, outreach and follow-up emails, *"have I applied here before?"*, *"what's stalled in my pipeline?"*. Those last two read straight from `tracker.xlsx`, the state you keep by hand and Claude reads.
 
 ## Requirements
 
-First-class on macOS and Linux. Windows works via WSL2; expect rougher edges.
+First-class on macOS and Linux. Windows works through WSL2; expect rougher edges.
 
-- **Python 3.13+**
-- **[uv](https://docs.astral.sh/uv/)** — Python package manager.
-- **[Docker](https://www.docker.com/products/docker-desktop/)** — runs LaTeX compilation in a container. ~5 GB image on first render.
-- **[Claude Code](https://www.anthropic.com/claude-code)** — the AI workflows.
+| Tool | For |
+|---|---|
+| **Python 3.13+** | the CLI |
+| **[uv](https://docs.astral.sh/uv/)** *(recommended)* | environment + running `co` |
+| **[Docker](https://www.docker.com/products/docker-desktop/)** | LaTeX compilation, sandboxed (~5 GB image on first render) |
+| **[Claude Code](https://www.anthropic.com/claude-code)** | the skills and agents |
 
-Plan ~30 minutes if you have none of these; ~5 if you have all of them.
+Other coding agents can drive the CLI and read the context files, but the skills, subagents, and slash commands are built for Claude Code, so expect partial function elsewhere.
 
 ## Setup
 
+This is not a clone-and-go repo. The setup is the filter, and most won't clear it. By design.
+
 ```bash
-git clone <repo>
-cd content-optimizer
+git clone <repo> && cd content-optimizer
 uv sync
 ```
 
-Then set up your context files in two fresh Claude Code chats. The templates have embedded interview instructions; Claude walks you through them.
+Then build your context files. Each ships with a `.example` template that embeds its own interview instructions. Open a fresh Claude Code chat and let it walk you through:
 
 ```
-Have a look at @career.md.example and help me set up my career file. Iteratively ask me probing questions to make sure we cover all the relevant information.
+Look at @career.md.example and help me set up my career file.
+Ask me probing questions until you have everything.
+```
+```
+Look at @preferences.md.example and help me set up my preferences file.
 ```
 
-```
-Have a look at @preferences.md.example and help me set up my preferences file.
-```
+| File | What it is | Effort |
+|---|---|---|
+| `career.md` | Your full profile, the source every artifact draws from | **High, upfront** |
+| `preferences.md` | Floors, walk-aways, situational scoring for triage | Medium |
+| `.claude/rules/writing-style.local.md` | Your voice and conventions *(optional)* | Low, ongoing |
+| `.claude/rules/anti-patterns.local.md` | Phrasings to never produce *(optional)* | Low, ongoing |
+| `tracker.xlsx` | Application state: `cp tracker.xlsx.example tracker.xlsx`, then keep it in Excel/Numbers | Ongoing |
 
-Be ruthless about depth, especially in `career.md`. The richer the source of truth, the less the generated content falls back on stock phrasing.
+Be ruthless about depth in `career.md`. Every role, project, mark, publication, side quest: what you owned, what you wrestled with, what you'd do differently.
 
-Two optional rules files refine voice when you're ready: `.claude/rules/writing-style.local.md` (your stylistic conventions) and `.claude/rules/anti-patterns.local.md` (phrases to never produce). Both gitignored.
+<details>
+<summary><b>Calibrating baselines (recommended, once you're rolling)</b></summary>
 
-## Workflow
+<br>
 
-Per opportunity:
+`create-artifact` works best when `defaults/resume.yaml` holds a clean, opportunity-agnostic version of your resume in your usual voice and structure. Per-opportunity artifacts then become *tactical edits* of that baseline rather than greenfield rewrites, which is what keeps every resume from reading as machine-made. Generate one well, save it as the default, refine over time. Without it, generation still works; it just starts from scratch each time.
 
-1. **Triage** a URL, pasted JD, or several at once. Returns Apply / Maybe / Skip with V/P/EV scores grounded in your context files.
-   ```
-   /assess <url-or-jd>
-   ```
+</details>
 
-2. **Scaffold** an opportunity folder.
-   ```bash
-   uv run co new-opportunity <slug>
-   ```
+## The CLI
 
-3. **Paste the JD** into `opportunities/<slug>/job-description.md`.
-
-4. **(Optional) Research** for deeper context: company, team, ATS, people. Output: `research.md`.
-   ```
-   /research-opportunity opportunities/<slug>/
-   ```
-
-5. **Generate** the artifact (YAML to PDF).
-   ```
-   /create-artifact resume opportunities/<slug>/
-   ```
-
-6. **(Optional) Stress-test** with three subagents in parallel: ATS simulator, recruiter funnel, gap analyzer.
-   ```
-   /vet <slug>
-   ```
-
-7. **Iterate** on formatting by editing the `.tex`; `uv run co render <file>.tex` recompiles.
-
-Step 5 is the only essential one once the JD is pasted.
+The deterministic half is a handful of `co` commands: `new-opportunity`, `fetch-jd`, `render`, `tracker`, `archive`. You rarely call them directly; Claude does, as it runs the pipeline. Full reference: **[`cli/README.md`](cli/README.md)**.
 
 ---
 
 <div align="center">
 
-*If you find this useful, consider starring the repo.*
+*A meticulous job hunt, version-controlled. If it's useful to you, star it.*
 
 </div>
