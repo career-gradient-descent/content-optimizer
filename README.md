@@ -27,14 +27,14 @@ The cost is front-loaded and real. Half a workday on `career.md` is the honest f
 | Stage | You say | Result |
 |---|---|---|
 | **Triage** | `/assess <url, text, or several>` | Apply / Maybe / Skip per JD, scored against your profile |
-| **Set up** | *"set up an opportunity for `<url>`"* | Folder scaffolded, JD pulled in |
+| **Set up** | *"set up an opportunity for `<url>`"* | Folder scaffolded, JD pulled in, row logged in your tracker |
 | **Research** *(opt.)* | `/research-opportunity <folder>` | `research.md`: company, team, ATS, people |
 | **Generate** | `/create-artifact resume <folder>` | Tailored resume or cover letter, YAML → PDF |
 | **Vet** *(opt.)* | `/vet <slug>` | Parallel ATS, recruiter-funnel, and gap reports |
 
 JD extraction is deterministic where the page allows. JS-heavy ATS pages (much of Workday, Ashby) you paste by hand.
 
-Everything around the edges is plain conversation, grounded in the same context files: application Q&A, outreach and follow-up emails, *"have I applied here before?"*, *"what's stalled in my pipeline?"*. Those last two read straight from `tracker.xlsx`, the state you keep by hand and Claude reads.
+Everything around the edges is plain conversation, grounded in the same context files: application Q&A, outreach and follow-up emails, *"have I applied here before?"*, *"what's stalled in my pipeline?"*. Those last two read straight from `tracker.xlsx`, the state you keep by hand; Claude reads it freely and edits a cell only at your word, with your spreadsheet's own dropdown rules enforced.
 
 ## Requirements
 
@@ -74,7 +74,7 @@ Look at @preferences.md.example and help me set up my preferences file.
 | `preferences.md` | Floors, walk-aways, situational scoring for triage | Medium |
 | `.claude/rules/writing-style.local.md` | Your voice and conventions *(optional)* | Low, ongoing |
 | `.claude/rules/anti-patterns.local.md` | Phrasings to never produce *(optional)* | Low, ongoing |
-| `tracker.xlsx` | Application state: `cp tracker.xlsx.example tracker.xlsx`, then keep it in Excel/Numbers | Ongoing |
+| `tracker.xlsx` | Application state: `cp tracker.xlsx.example tracker.xlsx`, then maintain it in your spreadsheet app | Ongoing |
 
 Be ruthless about depth in `career.md`. Every role, project, mark, publication, side quest: what you owned, what you wrestled with, what you'd do differently.
 

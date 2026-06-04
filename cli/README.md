@@ -14,8 +14,8 @@ uv run co <command> --help     # authoritative usage for any command
 | [`new-opportunity`](#new-opportunity) | Scaffold an opportunity folder + JD frontmatter | `opportunities/<slug>/` |
 | [`fetch-jd`](#fetch-jd) | Extract a JD from a URL to clean markdown | stdout |
 | [`render`](#render) | Compile an artifact YAML to PDF (or recompile a `.tex`) | PDF beside the input |
-| [`tracker`](#tracker) | Dump the application tracker to markdown for reading | stdout |
 | [`archive`](#archive) | Move a finished opportunity out of the active set | `opportunities/.archive/` |
+| [`tracker`](#tracker) | Read the application tracker; edit cells on explicit request | stdout / the tracker |
 
 Anticipated failures (a JS-rendered page, a missing file, a broken `.tex`) exit non-zero with a one-line message, never a traceback. Genuine bugs still surface in full.
 
@@ -57,17 +57,6 @@ YAML in → PDF out, beside the input. The entity is inferred from the filename 
 - Validation is strict (Pydantic): malformed YAML fails before LaTeX runs.
 - Compilation runs in Docker (`texlive/texlive`); a failed build reports the LaTeX error.
 
-## `tracker`
-
-```bash
-uv run co tracker [file]
-```
-
-Dumps every sheet of the tracker workbook (default `tracker.xlsx` at repo root) to markdown, so Claude (or you) can read the pipeline at a glance. **Read-only and structure-agnostic:** it assumes nothing about your columns, header rows, or sheet count, so you can restructure the spreadsheet freely and this keeps working.
-
-- The tracker is yours to maintain by hand (Excel/Numbers, with your colors and validation rules). The CLI only reads it.
-- No file yet? `cp tracker.xlsx.example tracker.xlsx`. A missing or non-xlsx file gives a clean message.
-
 ## `archive`
 
 ```bash
@@ -75,6 +64,26 @@ uv run co archive <slug>
 ```
 
 Moves `opportunities/<slug>/` into `opportunities/.archive/<slug>/`: out of the active list and out of Claude's globs, still on disk, fully reversible. Nothing is deleted.
+
+The tracker names the candidates: `co tracker read | grep -iE 'rejected|ghosted|withdrawn'`.
+
+## `tracker`
+
+```bash
+uv run co tracker read [file] [--grid]
+uv run co tracker set CELL=VALUE [CELL=VALUE ...] [--sheet NAME] [--file PATH]
+```
+
+`read` dumps every sheet of the tracker workbook (default `tracker.xlsx` at repo root) to markdown. **Structure-agnostic:** it assumes nothing about your columns, header rows, or sheet count, so you can restructure the spreadsheet freely and this keeps working. `--grid` adds sheet row numbers and column letters; run it before `set` to resolve exactly which cell you're targeting. Filter with pipes, not flags: `co tracker read | grep -i rejected`.
+
+`set` writes cell values in place, with the care rules in code rather than convention:
+
+- **The sheet's own dropdown rules are enforced.** A value outside a cell's list validation is refused, with the allowed values in the error. The rules live once, in the spreadsheet, maintained through your spreadsheet app; the CLI makes them binding.
+- **Typing is deterministic.** `YYYY-MM-DD` becomes a real date and inherits the column's existing date format; integers and floats become numbers; an empty value clears the cell; everything else is text. Values starting with `=` are refused (they would silently become formulas).
+- **The round-trip is safe.** Loads with formulas intact (never `data_only`), saves atomically (temp file + rename), and refuses to touch a workbook containing charts or images, the one thing an openpyxl save silently drops.
+- Appending a row is just `set` on the next empty row's cells; find it with `--grid`.
+
+The tracker stays the user's file: writes happen only on their explicit request, and the spreadsheet app should be closed during a write. No file yet? `cp tracker.xlsx.example tracker.xlsx`.
 
 ---
 
@@ -90,3 +99,5 @@ Scaffolding a folder and populating its JD are deliberately **two commands**, be
 | Nothing yet (placeholder) | `new-opportunity <slug>` → fill the JD later |
 
 In a chat you don't run these yourself. You say *"set up an opportunity for `<url>`"* and Claude sequences them: derives the slug, fills the frontmatter from the JD, places the body, and falls back to asking you to paste when extraction gives up. The split keeps each command single-purpose; the sequencing lives here so it's never guessed.
+
+Setup ends by logging the pursuit in the tracker: `co tracker read --grid` to find the next empty row, then one `co tracker set` filling the cells that map from frontmatter (organisation, role, location, ATS). The Listing hyperlink stays hand-entered; `set` writes values, not link objects.

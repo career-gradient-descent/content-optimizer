@@ -30,6 +30,7 @@ Per opportunity, any of:
 For every run, also read:
 - `career.md` at repo root (candidate background, source of truth).
 - `preferences.md` at repo root (floors, walk-aways, situational overrides).
+- The tracker: search it for each organisation (`uv run co tracker read | grep -i <organisation>`); on a hit, surface the prior application (role, date, status) in Notes.
 
 If `preferences.md` doesn't exist, fall back to defaults below and flag in the output that preferences-grounding is missing — V2 and V4 scores will be guesswork without it.
 

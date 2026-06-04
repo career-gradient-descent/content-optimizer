@@ -10,16 +10,18 @@ Each pursuit lives at `opportunities/<slug>/`. It typically holds `job-descripti
 
 - `career.md`: the full candidate profile; every artifact draws selectively from it.
 - `preferences.md`: floors, walk-aways, and situational scoring used in triage.
-- `tracker.xlsx`: application state. Read it via `co tracker` (read-only); the user maintains it by hand.
+- `tracker.xlsx`: application state. Read it via `co tracker read`; the user maintains it by hand. Cell writes only on explicit user request, via `co tracker set` (the sheet's own dropdown rules are enforced).
 - `.claude/rules/*.md`: voice and anti-patterns, auto-loaded.
 
 ## CLI
 
-Deterministic `co` commands: `new-opportunity`, `fetch-jd`, `render`, `tracker`, `archive`. Setting up an opportunity composes two of them: `new-opportunity` scaffolds the folder, `fetch-jd` pulls the JD body. Usage, flags, behavior, and the setup cases live in `cli/README.md`; read it before invoking, or run `co <command> --help`.
+Deterministic `co` commands: `new-opportunity`, `fetch-jd`, `render`, `archive`, `tracker`. Setting up an opportunity composes two of them: `new-opportunity` scaffolds the folder, `fetch-jd` pulls the JD body. Usage, flags, behavior, and the setup cases live in `cli/README.md`; read it before invoking, or run `co <command> --help`.
 
 ## Pipeline
 
 The heavy stages are user-invoked skills, deliberately explicit (slash only): `/assess` (triage), `/research-opportunity`, `/create-artifact`, `/vet`. Suggest them when apt; the user triggers them. Everything else (application Q&A, outreach, emails, pipeline queries against the tracker) is ordinary conversation grounded in the source-of-truth files above.
+
+The tracker follows the pursuit: when an opportunity is set up, offer to log its row; when the user reports an event ("applied", "rejected", "interview booked"), update the row via `co tracker set`; when rows go dead (Rejected, Ghosted, Withdrawn), suggest `co archive <slug>`.
 
 ## Operating mode
 
