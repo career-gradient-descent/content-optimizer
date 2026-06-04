@@ -20,19 +20,9 @@ TEMPLATE_DIR = Path(__file__).parent.parent / "templates"
 
 LATEX_DOCKER_IMAGE = "texlive/texlive:latest"
 
-# Custom Jinja delimiters so the templating syntax doesn't conflict with LaTeX's {}.
-JINJA_LATEX_DELIMITERS = {
-    "block_start_string"    : "<@",
-    "block_end_string"      : "@>",
-    "variable_start_string" : "<<",
-    "variable_end_string"   : ">>",
-    "comment_start_string"  : "<#",
-    "comment_end_string"    : "#>",
-}
-
 
 class CompilationError(Exception):
-    """LaTeX compilation failed."""
+    """ LaTeX compilation failed. """
 
 
 def _bold_substring(text: str, substring: str | None) -> str:
@@ -49,11 +39,17 @@ def populate_jinja_template(data: dict, entity: str, template: str = "primary") 
     validated   : Schema        = schema.model_validate(data)
     template_dir: Path          = TEMPLATE_DIR / entity
 
+    # Custom delimiters keep the templating syntax from colliding with LaTeX's {}.
     env = Environment(
-        loader          =FileSystemLoader(template_dir),
-        trim_blocks     =True,
-        lstrip_blocks   =True,
-        **JINJA_LATEX_DELIMITERS,
+        loader               =FileSystemLoader(template_dir),
+        trim_blocks          =True,
+        lstrip_blocks        =True,
+        block_start_string   ="<@",
+        block_end_string     ="@>",
+        variable_start_string="<<",
+        variable_end_string  =">>",
+        comment_start_string ="<#",
+        comment_end_string   ="#>",
     )
     env.filters["escape_latex"] = escape_latex
     env.filters["bold_substring"] = _bold_substring
@@ -62,7 +58,7 @@ def populate_jinja_template(data: dict, entity: str, template: str = "primary") 
 
 
 def _extract_log_errors(log: Path) -> str:
-    """Extract error lines from a pdflatex log file."""
+    """ Extract error lines from a pdflatex log file. """
     if not log.exists():
         return ""
     return "\n".join(
@@ -72,7 +68,7 @@ def _extract_log_errors(log: Path) -> str:
 
 
 def compile_tex(tex: Path) -> Path:
-    """Compile LaTeX to PDF via Docker."""
+    """ Compile LaTeX to PDF via Docker. """
 
     tex = tex.resolve()  # docker volume mount requires absolute host path
     pdf = tex.with_suffix(".pdf")

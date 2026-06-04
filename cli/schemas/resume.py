@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import Field, field_validator
 
-from cli.schemas import Schema
+from cli.schemas.base import Schema
 
 ATS_KEYWORDS_WORD_LIMIT = 13
 

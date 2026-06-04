@@ -8,6 +8,7 @@ authors = [{ name = "Urav Maniar", email = "urav06@gmail.com" }]
 license = { file = "LICENSE" }
 dependencies = [
     "jinja2>=3.1.6",
+    "openpyxl>=3.1.5",
     "pydantic>=2.12.5",
     "pylatex>=1.4.2",
     "pyyaml>=6.0.3",

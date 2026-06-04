@@ -1,1 +1,1 @@
-"""Career content generation CLI."""
+""" Career content generation CLI. """

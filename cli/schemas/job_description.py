@@ -1,6 +1,6 @@
 """ Job description frontmatter schema. """
 
-from cli.schemas import Schema
+from cli.schemas.base import Schema
 
 
 class JobDescriptionSchema(Schema):

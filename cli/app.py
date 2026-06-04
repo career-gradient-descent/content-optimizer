@@ -9,6 +9,7 @@ import yaml
 from cli.core import CompilationError, compile_tex, populate_jinja_template
 from cli.fetch import FetchError, fetch_jd_markdown
 from cli.schemas.job_description import JobDescriptionSchema
+from cli.tracker import TRACKER_PATH, TrackerError, read_tracker
 
 app = typer.Typer(
     help="Career content generation toolkit",
@@ -34,32 +35,12 @@ def _detect_ats(url: str) -> str:
 
 
 def _emit_frontmatter(fields: dict[str, str]) -> str:
-    """YAML frontmatter where empty values render as `key:` (no `''` clutter)."""
+    """ YAML frontmatter where empty values render as `key:` (no `''` clutter). """
     lines = [
         f"{k}:" if not v else yaml.safe_dump({k: v}, default_flow_style=False).rstrip("\n")
         for k, v in fields.items()
     ]
     return "\n".join(lines) + "\n"
-
-
-@app.command()
-def render(
-    file    : Annotated[Path, typer.Argument(help="YAML or TEX file")],
-    template: Annotated[str, typer.Option("-t", help="Template name")] = "primary",
-) -> None:
-    """Render PDF. YAML triggers full pipeline; TEX recompiles."""
-    if file.suffix == ".tex":
-        tex : Path = file
-    else:
-        tex : Path = file.with_suffix(".tex")
-        tex.parent.mkdir(parents=True, exist_ok=True)
-        tex.write_text(populate_jinja_template(yaml.safe_load(file.read_text()), file.stem, template))
-    try:
-        pdf : Path = compile_tex(tex)
-    except CompilationError as exc:
-        typer.echo(f"render failed: {exc}", err=True)
-        raise typer.Exit(1)
-    typer.echo(f"Generated: {pdf}")
 
 
 @app.command("new-opportunity")
@@ -72,9 +53,12 @@ def new_opportunity(
     ats             : Annotated[str, typer.Option(help="ATS system")] = "",
     comp            : Annotated[str, typer.Option(help="Compensation")] = "",
 ) -> None:
-    """Scaffold a new opportunity folder with empty job-description.md."""
+    """ Scaffold a new opportunity folder with empty job-description.md. """
     folder: Path = Path("opportunities") / slug
-    folder.mkdir(parents=True, exist_ok=False)
+    if folder.exists():
+        typer.echo(f"new-opportunity: {folder} already exists", err=True)
+        raise typer.Exit(1)
+    folder.mkdir(parents=True)
     (folder / "artifacts").mkdir()
 
     ats = ats or _detect_ats(url)
@@ -93,9 +77,61 @@ def new_opportunity(
 def fetch_jd(
     url: Annotated[str, typer.Argument(help="JD page URL")],
 ) -> None:
-    """Extract a job description to markdown (deterministic, no LLM). Prints to stdout."""
+    """ Extract a job description to markdown (deterministic, no LLM). Prints to stdout. """
     try:
         typer.echo(fetch_jd_markdown(url))
     except FetchError as exc:
-        typer.echo(f"fetch-jd gave up: {exc}", err=True)
+        typer.echo(f"fetch-jd: {exc}", err=True)
         raise typer.Exit(1)
+
+
+@app.command()
+def render(
+    file    : Annotated[Path, typer.Argument(help="YAML or TEX file")],
+    template: Annotated[str, typer.Option("-t", help="Template name")] = "primary",
+) -> None:
+    """ Render PDF. YAML triggers full pipeline; TEX recompiles. """
+    if file.suffix == ".tex":
+        tex : Path = file
+    else:
+        tex : Path = file.with_suffix(".tex")
+        tex.parent.mkdir(parents=True, exist_ok=True)
+        tex.write_text(populate_jinja_template(yaml.safe_load(file.read_text()), file.stem, template))
+    try:
+        pdf : Path = compile_tex(tex)
+    except CompilationError as exc:
+        typer.echo(f"render: {exc}", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"Generated: {pdf}")
+
+
+@app.command()
+def tracker(
+    file: Annotated[Path, typer.Argument(help="Tracker xlsx")] = TRACKER_PATH,
+) -> None:
+    """ Dump the application tracker (xlsx) to markdown. Read-only, deterministic. """
+    try:
+        typer.echo(read_tracker(file))
+    except TrackerError as exc:
+        typer.echo(f"tracker: {exc}", err=True)
+        raise typer.Exit(1)
+
+
+@app.command()
+def archive(
+    slug: Annotated[str, typer.Argument(help="Opportunity slug")],
+) -> None:
+    """ Move an opportunity folder into opportunities/.archive/. """
+    src : Path = Path("opportunities") / slug
+    if not src.is_dir():
+        typer.echo(f"archive: no opportunity at {src}", err=True)
+        raise typer.Exit(1)
+
+    dest : Path = Path("opportunities") / ".archive" / slug
+    if dest.exists():
+        typer.echo(f"archive: {dest} already exists", err=True)
+        raise typer.Exit(1)
+
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    src.rename(dest)
+    typer.echo(f"Archived: {src} → {dest}")

@@ -1,6 +1,6 @@
 """ Cover letter schema (placeholder). """
 
-from cli.schemas import Schema
+from cli.schemas.base import Schema
 
 
 class CoverLetterSchema(Schema, extra="allow"):

@@ -6,6 +6,7 @@ __pycache__/
 ### Personal ###
 career.md
 preferences.md
+tracker.xlsx
 
 defaults/*
 !defaults/.gitkeep
