@@ -9,7 +9,7 @@ import yaml
 from cli.core import CompilationError, compile_tex, populate_jinja_template
 from cli.fetch import FetchError, fetch_jd_markdown
 from cli.schemas.job_description import JobDescriptionSchema
-from cli.tracker import TRACKER_PATH, TrackerError, read_tracker
+from cli.tracker import TRACKER_PATH, TrackerError, read_tracker, set_cells
 
 app = typer.Typer(
     help="Career content generation toolkit",
@@ -105,13 +105,32 @@ def render(
     typer.echo(f"Generated: {pdf}")
 
 
-@app.command()
-def tracker(
+tracker_app = typer.Typer(help="Read and edit the application tracker (xlsx).")
+app.add_typer(tracker_app, name="tracker")
+
+
+@tracker_app.command("read")
+def tracker_read(
     file: Annotated[Path, typer.Argument(help="Tracker xlsx")] = TRACKER_PATH,
+    grid: Annotated[bool, typer.Option("--grid", help="Add row numbers + column letters for cell addressing")] = False,
 ) -> None:
-    """ Dump the application tracker (xlsx) to markdown. Read-only, deterministic. """
+    """ Dump the tracker to markdown. Read-only, deterministic. """
     try:
-        typer.echo(read_tracker(file))
+        typer.echo(read_tracker(file, grid=grid))
+    except TrackerError as exc:
+        typer.echo(f"tracker: {exc}", err=True)
+        raise typer.Exit(1)
+
+
+@tracker_app.command("set")
+def tracker_set(
+    assignments: Annotated[list[str], typer.Argument(help="CELL=VALUE ...")],
+    sheet      : Annotated[str, typer.Option(help="Sheet name (default: active sheet)")] = "",
+    file       : Annotated[Path, typer.Option(help="Tracker xlsx")] = TRACKER_PATH,
+) -> None:
+    """ Set cells in place. Dropdown rules enforced; '' clears; dates inherit column format. """
+    try:
+        typer.echo(set_cells(assignments, path=file, sheet=sheet or None))
     except TrackerError as exc:
         typer.echo(f"tracker: {exc}", err=True)
         raise typer.Exit(1)
