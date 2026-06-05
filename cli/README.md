@@ -3,11 +3,13 @@
 The auditable half of [Content Optimizer](../README.md). Every `co` command is a pure, deterministic step: same input, same output, no model in the loop. Claude invokes them as it runs the pipeline; you can run them by hand too.
 
 ```bash
-uv run co <command> [args]
-uv run co <command> --help     # authoritative usage for any command
+co <command> [args]
+co <command> --help     # authoritative usage for any command
 ```
 
 `--help` is generated from the code and never drifts. Treat it as the source of truth for exact flags. This document adds the *why*, the behavior, and the gotchas it can't.
+
+`co` is the project's venv script: run it from the repo root (paths resolve relative to it), with `.venv/bin` on your PATH or `uv run co` as the fallback.
 
 | Command | Does | Writes |
 |---|---|---|
@@ -24,7 +26,7 @@ Anticipated failures (a JS-rendered page, a missing file, a broken `.tex`) exit 
 ## `new-opportunity`
 
 ```bash
-uv run co new-opportunity <slug> [--role ...] [--organisation ...] [--location ...] [--url ...] [--ats ...] [--comp ...]
+co new-opportunity <slug> [--role ...] [--organisation ...] [--location ...] [--url ...] [--ats ...] [--comp ...]
 ```
 
 Creates `opportunities/<slug>/` with an `artifacts/` subfolder and a `job-description.md` containing only YAML frontmatter (empty body). Flags pre-populate the frontmatter; omitted ones render as empty keys. Slugs may nest: `google/sre-g1`.
@@ -37,7 +39,7 @@ It scaffolds the *container*. It does not fetch the JD body; that's `fetch-jd`. 
 ## `fetch-jd`
 
 ```bash
-uv run co fetch-jd <url>
+co fetch-jd <url>
 ```
 
 Fetches the page and extracts the main content to markdown, deterministically and with no LLM, so the JD lands word-for-word instead of paraphrased. Prints to stdout.
@@ -48,7 +50,7 @@ Fetches the page and extracts the main content to markdown, deterministically an
 ## `render`
 
 ```bash
-uv run co render <file> [-t <template>]
+co render <file> [-t <template>]
 ```
 
 YAML in → PDF out, beside the input. The entity is inferred from the filename stem: `resume.yaml` validates against the resume schema, `cover-letter.yaml` against the cover-letter schema. Passing a `.tex` recompiles it directly, for hand-tuning the LaTeX after generation.
@@ -60,7 +62,7 @@ YAML in → PDF out, beside the input. The entity is inferred from the filename 
 ## `archive`
 
 ```bash
-uv run co archive <slug>
+co archive <slug>
 ```
 
 Moves `opportunities/<slug>/` into `opportunities/.archive/<slug>/`: out of the active list and out of Claude's globs, still on disk, fully reversible. Nothing is deleted.
@@ -70,8 +72,8 @@ The tracker names the candidates: `co tracker read | grep -iE 'rejected|ghosted|
 ## `tracker`
 
 ```bash
-uv run co tracker read [file] [--grid]
-uv run co tracker set CELL=VALUE [CELL=VALUE ...] [--sheet NAME] [--file PATH]
+co tracker read [file] [--grid]
+co tracker set CELL=VALUE [CELL=VALUE ...] [--sheet NAME] [--file PATH]
 ```
 
 `read` dumps every sheet of the tracker workbook (default `tracker.xlsx` at repo root) to markdown. **Structure-agnostic:** it assumes nothing about your columns, header rows, or sheet count, so you can restructure the spreadsheet freely and this keeps working. `--grid` adds sheet row numbers and column letters; run it before `set` to resolve exactly which cell you're targeting. Filter with pipes, not flags: `co tracker read | grep -i rejected`.

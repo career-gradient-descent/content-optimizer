@@ -22,7 +22,7 @@ Research the opportunity beyond the JD: the company's situation, the team's tech
 
 Starting dimensions. Once these are covered, diverge into threads unique to the opportunity.
 
-- History: prior applications to this organisation (`uv run co tracker read | grep -i <organisation>`); outcomes and stages shape the angle and skip already-covered ground
+- History: prior applications to this organisation (`co tracker read | grep -i <organisation>`); outcomes and stages shape the angle and skip already-covered ground
 - Company: profile, business model, funding stage, financial health, revenue model
 - Culture: real working norms and values
 - Technical: stack, engineering practices, development culture

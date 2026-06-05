@@ -5,10 +5,10 @@
       "WebSearch",
       "Edit(opportunities/**)",
       "Write(opportunities/**)",
-      "Bash(uv run co *)"
+      "Bash(co *)"
     ],
     "ask": [
-      "Bash(uv run co tracker set *)"
+      "Bash(co tracker set *)"
     ]
   }
 }

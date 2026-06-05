@@ -3,7 +3,7 @@ name: create-artifact
 description: Generate a tailored career artifact (resume, cover letter, outreach, etc.) from career.md for a specific opportunity
 argument-hint: <opportunity-path> <context>
 disable-model-invocation: true
-allowed-tools: Read Write Edit Bash(uv run co *) Glob Grep
+allowed-tools: Read Write Edit Bash(co *) Glob Grep
 ---
 
 $ARGUMENTS
@@ -29,8 +29,8 @@ For artifacts that go through the PDF pipeline:
    - Adjust `ats_optimization` keywords for the specific ATS (only with a known target ATS; only adding keywords the visible content doesn't already cover)
    - Toggle optional sections (publications, certifications, specific projects) based on opportunity fit
 3. Preserve: voice, two-page length, depth-of-detail balance per role, structural integrity. Avoid full bullet rewrites, restructuring, content-free filler bullets, large length changes.
-4. Save to `opportunities/<slug>/artifacts/<entity>.yaml`. Render: `uv run co render opportunities/<slug>/artifacts/<entity>.yaml`
-5. Read the generated PDF to validate. If formatting needs adjustment, edit the `.tex` and re-render: `uv run co render opportunities/<slug>/artifacts/<entity>.tex`
+4. Save to `opportunities/<slug>/artifacts/<entity>.yaml`. Render: `co render opportunities/<slug>/artifacts/<entity>.yaml`
+5. Read the generated PDF to validate. If formatting needs adjustment, edit the `.tex` and re-render: `co render opportunities/<slug>/artifacts/<entity>.tex`
 
 Entity is `resume` or `cover-letter`.
 
