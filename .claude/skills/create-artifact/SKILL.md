@@ -2,8 +2,8 @@
 name: create-artifact
 description: Generate a tailored career artifact (resume, cover letter, outreach, etc.) from career.md for a specific opportunity
 argument-hint: <opportunity-path> <context>
-disable-model-invocation: true
-allowed-tools: Read Write Edit Bash(co *) Glob Grep
+disable-model-invocation: false
+allowed-tools: Read, Write, Edit, Bash(co *), Glob, Grep
 ---
 
 $ARGUMENTS

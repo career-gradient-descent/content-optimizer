@@ -2,8 +2,8 @@
 name: vet
 description: Run ats-insights, recruiter-scan, and gap-analyzer in parallel on an opportunity's resume. Use for a complete pre-submission stress test.
 argument-hint: <opportunity-folder-or-slug>
-disable-model-invocation: true
-allowed-tools: Agent Read Glob Grep
+disable-model-invocation: false
+allowed-tools: Agent, Read, Glob, Grep
 ---
 
 $ARGUMENTS

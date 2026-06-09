@@ -3,9 +3,16 @@
   "permissions": {
     "allow": [
       "WebSearch",
+
       "Edit(opportunities/**)",
       "Write(opportunities/**)",
-      "Bash(co *)"
+
+      "Bash(co *)",
+
+      "Skill(assess)",
+      "Skill(create-artifact)",
+      "Skill(research-opportunity)",
+      "Skill(vet)"
     ],
     "ask": [
       "Bash(co tracker set *)"

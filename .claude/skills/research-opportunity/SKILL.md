@@ -2,12 +2,12 @@
 name: research-opportunity
 description: Research an opportunity for context that informs downstream artifact creation
 argument-hint: <opportunity-path> <context>
-disable-model-invocation: true
+disable-model-invocation: false
 context: fork
 agent: general-purpose
 model: opus
 effort: xhigh
-allowed-tools: WebSearch WebFetch Read Write Glob Grep Bash(curl *)
+allowed-tools: WebSearch, WebFetch, Read, Write, Glob, Grep, Bash(curl *)
 ---
 
 $ARGUMENTS
