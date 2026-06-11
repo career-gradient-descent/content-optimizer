@@ -10,3 +10,4 @@ class JobDescriptionSchema(Schema):
     url          : str = ""
     ats          : str = ""
     comp         : str = ""
+    effort       : str = ""  # pursuit effort tier, set after triage; vocabulary lives with the skills

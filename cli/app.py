@@ -1,5 +1,6 @@
 """ CLI application. """
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated
 
@@ -9,7 +10,15 @@ import yaml
 from cli.core import CompilationError, compile_tex, populate_jinja_template
 from cli.fetch import FetchError, fetch_jd_markdown
 from cli.schemas.job_description import JobDescriptionSchema
-from cli.tracker import TRACKER_PATH, TrackerError, read_tracker, set_cells
+from cli.tracker import (
+    TRACKER_PATH,
+    TrackerError,
+    add_row,
+    describe_tracker,
+    read_tracker,
+    set_cells,
+    update_row,
+)
 
 app = typer.Typer(
     help="Career content generation toolkit",
@@ -52,6 +61,7 @@ def new_opportunity(
     url             : Annotated[str, typer.Option(help="Source URL")] = "",
     ats             : Annotated[str, typer.Option(help="ATS system")] = "",
     comp            : Annotated[str, typer.Option(help="Compensation")] = "",
+    effort          : Annotated[str, typer.Option(help="Pursuit effort tier")] = "",
 ) -> None:
     """ Scaffold a new opportunity folder with empty job-description.md. """
     folder: Path = Path("opportunities") / slug
@@ -65,7 +75,7 @@ def new_opportunity(
 
     jd : JobDescriptionSchema = JobDescriptionSchema(
         role=role, organisation=organisation, location=location,
-        url=url, ats=ats, comp=comp,
+        url=url, ats=ats, comp=comp, effort=effort,
     )
     frontmatter : str = _emit_frontmatter(jd.model_dump())
     jd_path : Path = folder / "job-description.md"
@@ -109,17 +119,51 @@ tracker_app = typer.Typer(help="Read and edit the application tracker (xlsx).")
 app.add_typer(tracker_app, name="tracker")
 
 
+def _tracker_run(action: Callable[[], str]) -> None:
+    """ The one error contract for tracker commands: TrackerError -> one line on stderr, exit 1. """
+    try:
+        typer.echo(action())
+    except TrackerError as exc:
+        typer.echo(f"tracker: {exc}", err=True)
+        raise typer.Exit(1)
+
+
 @tracker_app.command("read")
 def tracker_read(
     file: Annotated[Path, typer.Argument(help="Tracker xlsx")] = TRACKER_PATH,
     grid: Annotated[bool, typer.Option("--grid", help="Add row numbers + column letters for cell addressing")] = False,
 ) -> None:
     """ Dump the tracker to markdown. Read-only, deterministic. """
-    try:
-        typer.echo(read_tracker(file, grid=grid))
-    except TrackerError as exc:
-        typer.echo(f"tracker: {exc}", err=True)
-        raise typer.Exit(1)
+    _tracker_run(lambda: read_tracker(file, grid=grid))
+
+
+@tracker_app.command("schema")
+def tracker_schema(
+    file: Annotated[Path, typer.Argument(help="Tracker xlsx")] = TRACKER_PATH,
+) -> None:
+    """ Describe each sheet: columns, headers, dropdown rules, date formats. Read-only. """
+    _tracker_run(lambda: describe_tracker(file))
+
+
+@tracker_app.command("add")
+def tracker_add(
+    assignments: Annotated[list[str], typer.Argument(help="HEADER=VALUE ...")],
+    sheet      : Annotated[str, typer.Option(help="Sheet name (default: active sheet)")] = "",
+    file       : Annotated[Path, typer.Option(help="Tracker xlsx")] = TRACKER_PATH,
+) -> None:
+    """ Append a row after the last occupied one, keyed by header names. Same rules as set. """
+    _tracker_run(lambda: add_row(assignments, path=file, sheet=sheet or None))
+
+
+@tracker_app.command("update")
+def tracker_update(
+    assignments: Annotated[list[str], typer.Argument(help="HEADER=VALUE ...")],
+    match      : Annotated[str, typer.Option("--match", help="Substring identifying exactly one row")],
+    sheet      : Annotated[str, typer.Option(help="Sheet name (default: active sheet)")] = "",
+    file       : Annotated[Path, typer.Option(help="Tracker xlsx")] = TRACKER_PATH,
+) -> None:
+    """ Update the single row matching --match, keyed by header names. Same rules as set. """
+    _tracker_run(lambda: update_row(match, assignments, path=file, sheet=sheet or None))
 
 
 @tracker_app.command("set")
@@ -129,11 +173,7 @@ def tracker_set(
     file       : Annotated[Path, typer.Option(help="Tracker xlsx")] = TRACKER_PATH,
 ) -> None:
     """ Set cells in place. Dropdown rules enforced; '' clears; dates inherit column format. """
-    try:
-        typer.echo(set_cells(assignments, path=file, sheet=sheet or None))
-    except TrackerError as exc:
-        typer.echo(f"tracker: {exc}", err=True)
-        raise typer.Exit(1)
+    _tracker_run(lambda: set_cells(assignments, path=file, sheet=sheet or None))
 
 
 @app.command()

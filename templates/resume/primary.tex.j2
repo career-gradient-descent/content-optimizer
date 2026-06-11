@@ -119,6 +119,8 @@
 
 %-------------------------------------------
 %%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Sections render in `section_order` (validated upstream to cover exactly the
+% sections with data), so arrangement is an artifact decision, not a template one.
 
 
 \begin{document}
@@ -129,12 +131,13 @@
     <@ if links and links|length > 0 @>\small <@ for link in links @><@ if not loop.first @> $|$ <@ endif @>\href{<<link.url>>}{<<link.display|escape_latex>>}<@ endfor @><@ endif @>
 \end{center}
 
+<@ for section in section_order @>
+<@ if section == "summary" @>
 %-----------SUMMARY-----------
-<@ if summary @>
 \section{Summary}
 <<summary|escape_latex>>
-<@ endif @>
 
+<@ elif section == "education" @>
 %-----------EDUCATION-----------
 \section{Education}
   \resumeSubHeadingListStart
@@ -152,8 +155,8 @@
     <@ endfor @>
   \resumeSubHeadingListEnd
 
+<@ elif section == "publications" @>
 %-----------PUBLICATIONS-----------
-<@ if publications and publications|length > 0 @>
 \section{Publications}
   \begin{itemize}[leftmargin=0.15in, label={}]
     <@ for pub in publications @>
@@ -165,8 +168,8 @@
     \vspace{2pt}
     <@ endfor @>
   \end{itemize}
-<@ endif @>
 
+<@ elif section == "experience" @>
 %-----------EXPERIENCE-----------
 \section{Experience}
   \resumeSubHeadingListStart
@@ -182,9 +185,8 @@
     <@ endfor @>
   \resumeSubHeadingListEnd
 
-
+<@ elif section == "projects" @>
 %-----------PROJECTS-----------
-<@ if projects @>
 \section{Projects}
     \resumeSubHeadingListStart
       <@ for project in projects @>
@@ -203,10 +205,9 @@
           <@ endif @>
       <@ endfor @>
     \resumeSubHeadingListEnd
-<@ endif @>
 
+<@ elif section == "certifications" @>
 %-----------LICENSES & CERTIFICATIONS-----------
-<@ if certifications and certifications|length > 0 @>
 \section{Licenses \& Certifications}
     \resumeSubHeadingListStart
       <@ for cert in certifications @>
@@ -217,10 +218,9 @@
           \resumeItemListEnd
       <@ endfor @>
     \resumeSubHeadingListEnd
-<@ endif @>
 
+<@ elif section == "skills" @>
 %-----------TECHNICAL SKILLS-----------
-<@ if skills and skills|length > 0 @>
 \section{Technical Skills}
  \begin{itemize}[leftmargin=0.15in, label={}]
     \small{\item{
@@ -229,8 +229,20 @@
      <@ endfor @>
     }}
  \end{itemize}
-<@ endif @>
 
+<@ elif section == "interests" @>
+%-----------INTERESTS-----------
+\section{Interests}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     <@ for line in interests @>
+     <<line|escape_latex>><@ if not loop.last @> \\<@ endif @>
+     <@ endfor @>
+    }}
+ \end{itemize}
+
+<@ endif @>
+<@ endfor @>
 %-------------------------------------------
 <@ if basics.ats_optimization @>\atsKeywords{ <<basics.ats_optimization|escape_latex>>}<@ endif @>
 \end{document}

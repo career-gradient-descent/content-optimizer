@@ -1,12 +1,19 @@
 """ Resume schema. """
 
-from typing import Literal
+from typing import Literal, get_args
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from cli.schemas.base import Schema
 
 ATS_KEYWORDS_WORD_LIMIT = 13
+
+# Renderable sections, declared in canonical order. `section_order` permutes these per
+# artifact; the template renders whatever order the validated model carries.
+SectionName = Literal["summary", "education", "publications", "experience",
+                      "projects", "certifications", "skills", "interests"]
+
+SECTION_NAMES: tuple[SectionName, ...] = get_args(SectionName)
 
 
 class Basics(Schema):
@@ -107,4 +114,32 @@ class ResumeSchema(Schema, extra="forbid"):
         description="Category to comma-separated items. Rendered as labeled lines under Technical Skills.",
     )
     certifications  : list[Certification] | None    = None
+    interests       : list[str] | None              = Field(
+        None,
+        description="Lines for an Interests section (extracurriculars, leadership, hobbies). Rendered like skills.",
+    )
     meta            : Meta | None                   = None
+    section_order   : list[SectionName] | None      = Field(
+        None,
+        description="Render order for the sections present. Omitted: canonical order. "
+                    "If given, must list every section that has data, exactly once.",
+    )
+
+    @model_validator(mode="after")
+    def _resolve_section_order(self) -> "ResumeSchema":
+        """ Sections render where `section_order` says; data presence decides *whether* a
+        section renders, the order decides only *where*. A provided order must therefore be
+        an exact permutation of the sections with data — a silently dropped or smuggled-in
+        section is a content bug worth failing loudly on. Resolves to the effective order
+        so the template never reasons about defaults. """
+        present: list[SectionName] = [name for name in SECTION_NAMES if getattr(self, name)]
+        if self.section_order is None:
+            self.section_order = present
+            return self
+        if duplicates := {name for name in self.section_order if self.section_order.count(name) > 1}:
+            raise ValueError(f"section_order has duplicates: {sorted(duplicates)}")
+        if missing := set(present) - set(self.section_order):
+            raise ValueError(f"section_order is missing sections with data: {sorted(missing)}")
+        if extra := set(self.section_order) - set(present):
+            raise ValueError(f"section_order lists sections without data: {sorted(extra)}")
+        return self

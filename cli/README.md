@@ -26,7 +26,7 @@ Anticipated failures (a JS-rendered page, a missing file, a broken `.tex`) exit 
 ## `new-opportunity`
 
 ```bash
-co new-opportunity <slug> [--role ...] [--organisation ...] [--location ...] [--url ...] [--ats ...] [--comp ...]
+co new-opportunity <slug> [--role ...] [--organisation ...] [--location ...] [--url ...] [--ats ...] [--comp ...] [--effort ...]
 ```
 
 Creates `opportunities/<slug>/` with an `artifacts/` subfolder and a `job-description.md` containing only YAML frontmatter (empty body). Flags pre-populate the frontmatter; omitted ones render as empty keys. Slugs may nest: `google/sre-g1`.
@@ -57,6 +57,7 @@ YAML in → PDF out, beside the input. The entity is inferred from the filename 
 
 - `-t` selects the template (default `primary`).
 - Validation is strict (Pydantic): malformed YAML fails before LaTeX runs.
+- A resume YAML may carry `section_order` to control the order sections render in. If present it must list every section that has data, exactly once; omitted, sections render in the canonical order.
 - Compilation runs in Docker (`texlive/texlive`); a failed build reports the LaTeX error.
 
 ## `archive`
@@ -73,17 +74,26 @@ The tracker names the candidates: `co tracker read | grep -iE 'rejected|ghosted|
 
 ```bash
 co tracker read [file] [--grid]
+co tracker schema [file]
+co tracker add HEADER=VALUE [HEADER=VALUE ...] [--sheet NAME] [--file PATH]
+co tracker update --match TEXT HEADER=VALUE [HEADER=VALUE ...] [--sheet NAME] [--file PATH]
 co tracker set CELL=VALUE [CELL=VALUE ...] [--sheet NAME] [--file PATH]
 ```
 
-`read` dumps every sheet of the tracker workbook (default `tracker.xlsx` at repo root) to markdown. **Structure-agnostic:** it assumes nothing about your columns, header rows, or sheet count, so you can restructure the spreadsheet freely and this keeps working. `--grid` adds sheet row numbers and column letters; run it before `set` to resolve exactly which cell you're targeting. Filter with pipes, not flags: `co tracker read | grep -i rejected`.
+`read` dumps every sheet of the tracker workbook (default `tracker.xlsx` at repo root) to markdown. **Structure-agnostic:** it assumes nothing about your columns, header rows, or sheet count, so you can restructure the spreadsheet freely and this keeps working. `--grid` adds sheet row numbers and column letters for cell addressing. Filter with pipes, not flags: `co tracker read | grep -i rejected`.
 
-`set` writes cell values in place, with the care rules in code rather than convention:
+`schema` describes each sheet: column letters, header names, dropdown options, date formats. Read-only. It's the discovery step that makes the row verbs one-shot; nothing outside the spreadsheet ever needs to know its columns.
+
+`add` appends a row after the last occupied one, `update` edits the single row matching `--match` (a case-insensitive substring tested against every cell) and echoes the matched row before the changes. Both are keyed by header names, resolved from the sheet at call time, case-insensitively. An unknown header fails listing the real ones; an ambiguous `--match` fails listing the candidate rows. The one structural assumption: **the first non-empty row is the header row.**
+
+`set` is the low-level escape hatch, addressing cells directly (`L26=...`) for edits the row verbs can't express; resolve coordinates with `read --grid` first.
+
+All three write verbs share the same care rules, in code rather than convention:
 
 - **The sheet's own dropdown rules are enforced.** A value outside a cell's list validation is refused, with the allowed values in the error. The rules live once, in the spreadsheet, maintained through your spreadsheet app; the CLI makes them binding.
 - **Typing is deterministic.** `YYYY-MM-DD` becomes a real date and inherits the column's existing date format; integers and floats become numbers; an empty value clears the cell; everything else is text. Values starting with `=` are refused (they would silently become formulas).
-- **The round-trip is safe.** Loads with formulas intact (never `data_only`), saves atomically (temp file + rename), and refuses to touch a workbook containing charts or images, the one thing an openpyxl save silently drops.
-- Appending a row is just `set` on the next empty row's cells; find it with `--grid`.
+- **The round-trip is safe.** Loads with formulas intact (never `data_only`), saves atomically (temp file + rename), and refuses to touch a workbook containing charts or images, the one thing an openpyxl save silently drops. A refused value aborts the whole command; nothing partial is ever saved.
+- `set` writes values, not link objects: hyperlinks stay hand-entered.
 
 The tracker stays the user's file: writes happen only on their explicit request, and the spreadsheet app should be closed during a write. No file yet? `cp tracker.xlsx.example tracker.xlsx`.
 
@@ -102,4 +112,4 @@ Scaffolding a folder and populating its JD are deliberately **two commands**, be
 
 In a chat you don't run these yourself. You say *"set up an opportunity for `<url>`"* and Claude sequences them: derives the slug, fills the frontmatter from the JD, places the body, and falls back to asking you to paste when extraction gives up. The split keeps each command single-purpose; the sequencing lives here so it's never guessed.
 
-Setup ends by logging the pursuit in the tracker: `co tracker read --grid` to find the next empty row, then one `co tracker set` filling the cells that map from frontmatter (organisation, role, location, ATS). The Listing hyperlink stays hand-entered; `set` writes values, not link objects.
+Setup ends by logging the pursuit in the tracker: `co tracker schema` to see the columns, then one `co tracker add` filling the headers that map from frontmatter (organisation, role, location, ATS). The Listing hyperlink stays hand-entered.
