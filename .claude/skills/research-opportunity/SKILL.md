@@ -42,3 +42,12 @@ Each round should surface questions that the next round answers. A productive ro
 ## Output
 
 Write findings to `research.md` in the opportunity folder, structured for downstream consumption by another agent creating tailored career artifacts. Do not modify existing files.
+
+End the file with an `## Artifact directives` section translating the research into artifact decisions:
+
+- **Reviewer funnel**: who reads the resume first (agency recruiter, internal HR, hiring manager, engineer) and what they weight.
+- **ATS**: the identified system, or "unknown".
+- **Arrangement**: recommended section order and lead experience entry for this reviewer funnel.
+- **Facets**: which true framings of the candidate's work this opportunity values (from career.md).
+- **Language**: keywords legitimately mirrorable, AU/US spelling.
+- **Beyond the artifact**: high-leverage actions surfaced by research — people to contact, referral paths, sister roles worth targeting.

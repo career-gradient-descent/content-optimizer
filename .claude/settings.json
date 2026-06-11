@@ -12,9 +12,12 @@
       "Skill(assess)",
       "Skill(create-artifact)",
       "Skill(research-opportunity)",
-      "Skill(vet)"
+      "Skill(vet)",
+      "Skill(funnel)"
     ],
     "ask": [
+      "Bash(co tracker add *)",
+      "Bash(co tracker update *)",
       "Bash(co tracker set *)"
     ]
   }

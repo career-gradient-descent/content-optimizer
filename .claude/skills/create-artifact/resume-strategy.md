@@ -1,29 +1,47 @@
 # Resume Strategy
 
-## Default-as-baseline, tactical modification
+## The governing rule
 
-When a default resume exists, treat it as the calibrated baseline and modify it tactically for each opportunity. Reorder bullets, swap 1-2 for stronger alternatives from career.md, tweak summary phrasing, adjust skills emphasis, toggle optional sections. Preserve voice, length, and structure. Do not regenerate from scratch — that produces hyper-optimized over-fits that read as obviously tailored. The default's calibration is doing real work; respect it.
+Tailoring detectability lives in prose, not arrangement. A reviewer spots a tailored resume when its words echo the JD: mirrored phrasing, niche identifiers in the summary, keyword-shaped bullets. Nobody spots tailoring from which section leads, which role carries five bullets, or which projects appear; those read as the candidate's natural emphasis.
 
-The resume operates on three layers, each with different rules for how aggressively it can be optimized.
+So allocate the tailoring budget by detectability:
 
-## The trojan horse (invisible layer)
+- **The default is the prose anchor.** Words come from `defaults/resume.yaml` and `career.md`. Its voice and phrasing are calibrated; keep them.
+- **The opportunity is the arrangement driver.** Structure (order, emphasis, selection) comes from the JD and `research.md`. Move it freely.
 
-`basics.ats_optimization`: invisible text rendered via `\atsKeywords{}` in the PDF. ATS parses it, humans never see it. This is where keywords from the JD that would look unnatural in visible text can be packed aggressively. No subtlety needed here; this text exists purely to get past the gates.
+## The decision sheet
 
-`meta.subject` and `meta.keywords`: PDF metadata fields in `\hypersetup{}`. Also invisible, also machine-readable. Use for role title, key skills, and industry terms.
+Walk every decision below for each opportunity. The `## Artifact directives` section of `research.md` grounds them; without research, decide from the JD alone and say so in the summary to the user.
 
-## Summary
+### Arrangement — move freely
 
-First thing a recruiter reads after the name. Sets the narrative for the entire resume. Should align with the role while reading naturally. Not a keyword dump.
+- **Section order** (`section_order` in the YAML): lead with what the first reviewer values. HR-gated or industrial: skills and experience up top, education and publications late. Research-shaped: education and publications early. Engineer-read (hiring manager direct, small startup): experience or projects first.
+- **Entry order within Experience**: the top entry is the schema anchor, the role a scanning recruiter takes as "what this person is". Lead with the most relevant role, not necessarily the most recent. Dates stay prominent so reordering never reads as concealment.
+- **Bullet budget per role**: allocate by relevance. Lead roles carry 4-5 bullets, distant ones 1-2. This shifts emphasis without changing a single word.
+- **Page-1 top half**: after rendering, read the PDF. The strongest opportunity-relevant signal belongs above the fold; rearrange until it is.
 
-## Visible content (Experience, Projects, Education, Skills)
+### Selection — free, bounded by career.md
 
-Writing style rules apply here. Each bullet should serve the 6-second recruiter scan and the deep technical read simultaneously. The Skills section is a direct keyword matching opportunity: mirror the JD's terminology where genuine.
+- **Bullets**: select from career.md's full pool per role, not only the default's picks.
+- **Facets**: career.md holds several true framings of the same work (the Fisdom notifications service is simultaneously a greenfield microservice, a monolith decomposition, and regulated OTP traffic). Surface the facet this opportunity values. Selection of true facets, never composition of new claims.
+- **Company taglines**: same facet logic; describe each employer by the dimension this opportunity cares about.
+- **Roster toggles**: projects, publications (full section, single line, or off), education detail (coursework and thesis for grad-shaped roles, one line for industry), links (Scholar in for research roles), interests on or off.
+- **Skills section**: the one visible keyword-matching surface. For skills genuinely held per career.md, mirror the JD's term for them in canonical form; naming a real skill by the reader's word is selection, not imported vocabulary.
+- **Titles**: adjacent-synonym and market-localisation adjustments are fine (Back End Developer ↔ Backend Engineer; dropping an India-market level suffix like "SDE-1" for readers it won't parse). Level inflation never.
 
-**Evidence over listing.** Bullets must demonstrate skills through specific achievements rather than asserting them. An LLM-based grader should be able to cite a concrete evidence span for any skill claimed. "Strong communication skills" is un-citeable; "Negotiated $2M renewal across 6 stakeholders" demonstrates the same skill with provable content. Matters most for LLM-native ATSs (Ashby, Lever Talent Fit) and future-proofs against industry drift toward LLM-based scoring.
+### Prose — anchored
 
-**Canonical skill names.** Use industry-standard forms: "JavaScript" (not "JS"), "Python" (not "python3"), "Amazon Web Services (AWS)" (full + acronym on first mention). Creative rephrasing confuses taxonomy-aligned ATSs (SmartRecruiters, SAP SuccessFactors) that normalize to standard forms.
+- **Summary**: full rewrite is allowed, under hard constraints: every claim traceable to career.md, vocabulary limited to what the visible resume substantiates, ubiquitous tech only. Specialized identifiers belong in Experience or Projects (per the anti-patterns rule).
+- **Bullets**: when rewording, re-anchor from career.md's richer descriptions; pick the chosen facet's words. Never import vocabulary that exists only in the JD.
+- **Spelling**: match the market. Australian opportunities get Australian English ("organisation" scores on PageUp; "organization" does not).
 
-## Competency frameworks
+### Invisible layer — aggressive
 
-When a JD references a formal competency framework (Australian Public Service Integrated Leadership System, UK Civil Service Behaviours, large-consultancy frameworks, etc.), mirror the exact capability titles as phrases in bullets. For APS specifically: "Achieves Results", "Communicates with Influence", "Supports Productive Working Relationships", "Shapes Strategic Thinking", "Exemplifies Personal Drive and Integrity". Literal-match ATSs (PageUp, Taleo) weight these directly.
+- `basics.ats_optimization`: invisible text rendered via `\atsKeywords{}` (hard-capped at 13 words). ATS parsers extract it, humans never see it. Pack JD keywords that would look unnatural in visible text. Adjust only for a known target ATS; with none identified (human-only review, direct email), the default's keywords stand. Greenhouse-class ATSs surface extracted text to recruiters, so keep it defensible: canonical forms and acronym expansions of skills the visible resume already claims.
+- `meta.subject` and `meta.keywords`: PDF metadata in `\hypersetup{}`, also invisible and machine-readable. Role title, key skills, industry terms.
+
+## ATS specifics
+
+- **Evidence over listing.** LLM-rubric ATSs (Ashby, Lever Talent Fit) grade by citing evidence spans. "Strong communication skills" is un-citeable; "Negotiated $2M renewal across 6 stakeholders" demonstrates it with provable content.
+- **Canonical skill names.** Taxonomy-aligned ATSs (SmartRecruiters, SAP SuccessFactors) normalize to standard forms: "JavaScript" not "JS", "Python" not "python3", "Amazon Web Services (AWS)" full plus acronym on first mention.
+- **Competency frameworks.** When a JD references a formal framework, mirror the exact capability titles as phrases in bullets. APS Integrated Leadership System: "Achieves Results", "Communicates with Influence", "Supports Productive Working Relationships", "Shapes Strategic Thinking", "Exemplifies Personal Drive and Integrity". Literal-match ATSs (PageUp, Taleo) weight these directly.

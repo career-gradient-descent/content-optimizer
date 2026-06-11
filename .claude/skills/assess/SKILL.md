@@ -22,10 +22,13 @@ Outcome-agnostic scoring: the LLM judges each dimension independently with a cit
 
 Per opportunity, any of:
 - A URL → fetch via WebFetch.
-- A file path or opportunity folder path → Read. For an opportunity folder, the JD is `job-description.md`.
+- A screenshot or image of a JD attached to the conversation → read the JD from it.
 - Pasted JD text inside `$ARGUMENTS`.
+- A file path or opportunity folder path → Read. For an opportunity folder, read every file in it except `artifacts/`: `job-description.md` is the JD; `research.md` and other notes ground the scores with researched evidence. When the folder nests under an organisation folder, shared files one level up (research, correspondence) are context too.
 
 `$ARGUMENTS` may contain multiple opportunities, mixed types, and conversational filler around them. Parse intent, isolate the JDs.
+
+A researched folder makes this a second-pass verdict: research evidence feeds the dimensions the JD alone can't ground (comp, team reality, hiring process), and citations name `research.md` as their source like any other.
 
 For every run, also read:
 - `career.md` at repo root (candidate background, source of truth).
