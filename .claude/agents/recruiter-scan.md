@@ -3,6 +3,7 @@ name: recruiter-scan
 description: Simulates the full human reviewer funnel (non-technical recruiter, technical recruiter, hiring manager, senior engineer) evaluating a rendered resume against a specific opportunity. Produces phase-by-phase findings from the initial visual scan plus per-persona verdicts with evidence citations and risk flags. Use after generating a resume to stress-test it against human scrutiny.
 tools: Read, Glob, Grep
 model: sonnet
+effort: medium
 color: orange
 ---
 

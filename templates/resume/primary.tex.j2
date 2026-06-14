@@ -14,9 +14,13 @@
 \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{verbatim}
 \usepackage{enumitem}
-\usepackage[colorlinks=true, allcolors={blue!25!black}]{hyperref}
+\usepackage[colorlinks=true]{hyperref}
 \usepackage{pdfrender}
+% Link colour: a restrained document-link blue. Reads as clickable at a glance
+% without web-cheapness; prints to a clean mid-grey.
+\definecolor{linkblue}{RGB}{0,80,155}
 \hypersetup{
+    allcolors=linkblue,
     pdftitle={<<basics.name|escape_latex>> Resume},
     pdfauthor={<<basics.name|escape_latex>>},
     pdfcreator={<<basics.name|escape_latex>>},<@ if meta @><@ if meta.subject @>

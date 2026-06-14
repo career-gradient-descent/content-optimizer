@@ -4,7 +4,9 @@ Toolkit for producing career marketing artifacts (resumes, cover letters, outrea
 
 ## The opportunity is the unit
 
-Each pursuit lives at `opportunities/<slug>/`. It typically holds `job-description.md` (YAML frontmatter + body), an optional `research.md`, and an `artifacts/` subfolder for generated content. Slugs can nest (`opportunities/google/sre-g1/`).
+Each pursuit lives at `opportunities/<slug>/`, holding `job-description.md` (YAML frontmatter + body), an optional `research.md`, and an `artifacts/` subfolder for generated content.
+
+When one organisation has several roles, nest them under a shared org folder: `opportunities/<org>/<role>/`. Company research and people belong at the org level — `research.md`, an `outreach/` folder, correspondence — written once and read from one level up; each role folder holds only its own `job-description.md` and `artifacts/`. A lone role can stay flat at `opportunities/<slug>/`.
 
 ## Source of truth
 
@@ -19,7 +21,7 @@ Deterministic `co` commands: `new-opportunity`, `fetch-jd`, `render`, `archive`,
 
 ## Pipeline
 
-The heavy stages are user-invoked skills, deliberately explicit (slash only): `/assess` (triage), `/research-opportunity`, `/create-artifact`, `/vet`. `/funnel` chains them over a batch, end to end. Suggest them when apt; the user triggers them. Everything else (application Q&A, outreach, emails, pipeline queries against the tracker) is ordinary conversation grounded in the source-of-truth files above.
+The heavy stages are skills, slash-invocable and model-invocable alike: `/assess` (triage), `/research-opportunity`, `/create-artifact`, `/vet`. `/funnel` chains them over a batch, end to end. Invoke the matching skill when a request plainly calls for a stage; suggest the slash form when the user seems unaware of it. Everything else (application Q&A, outreach, emails, pipeline queries against the tracker) is ordinary conversation grounded in the source-of-truth files above.
 
 The tracker follows the pursuit: when an opportunity is set up, offer to log its row (`co tracker add`); when the user reports an event ("applied", "rejected", "interview booked"), update the row (`co tracker update --match`); when rows go dead (Rejected, Ghosted, Withdrawn), suggest `co archive <slug>`.
 

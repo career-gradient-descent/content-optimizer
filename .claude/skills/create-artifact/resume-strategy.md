@@ -22,10 +22,12 @@ Walk every decision below for each opportunity. The `## Artifact directives` sec
 
 ### Selection — free, bounded by career.md
 
+Two pages is the canvas, not a ceiling to duck under. Fill it with the strongest true content career.md offers; an underfull page is wasted signal, not safety. Selection picks the best content to fill the space, not the smallest relevant subset, and filler — content-free bullets, padded sentences — is never the fix. A short page means more real content.
+
 - **Bullets**: select from career.md's full pool per role, not only the default's picks.
 - **Facets**: career.md holds several true framings of the same work (the Fisdom notifications service is simultaneously a greenfield microservice, a monolith decomposition, and regulated OTP traffic). Surface the facet this opportunity values. Selection of true facets, never composition of new claims.
 - **Company taglines**: same facet logic; describe each employer by the dimension this opportunity cares about.
-- **Roster toggles**: projects, publications (full section, single line, or off), education detail (coursework and thesis for grad-shaped roles, one line for industry), links (Scholar in for research roles), interests on or off.
+- **Roster toggles**: toggle to surface the strongest content and fill the canvas, not to trim it. Projects, publications (full section, single line, or off), education detail (coursework and thesis for grad-shaped roles, one line for industry), links (Scholar in for research roles), interests on or off.
 - **Skills section**: the one visible keyword-matching surface. For skills genuinely held per career.md, mirror the JD's term for them in canonical form; naming a real skill by the reader's word is selection, not imported vocabulary.
 - **Titles**: adjacent-synonym and market-localisation adjustments are fine (Back End Developer ↔ Backend Engineer; dropping an India-market level suffix like "SDE-1" for readers it won't parse). Level inflation never.
 
@@ -35,10 +37,10 @@ Walk every decision below for each opportunity. The `## Artifact directives` sec
 - **Bullets**: when rewording, re-anchor from career.md's richer descriptions; pick the chosen facet's words. Never import vocabulary that exists only in the JD.
 - **Spelling**: match the market. Australian opportunities get Australian English ("organisation" scores on PageUp; "organization" does not).
 
-### Invisible layer — aggressive
+### Invisible layer — metadata by default
 
-- `basics.ats_optimization`: invisible text rendered via `\atsKeywords{}` (hard-capped at 13 words). ATS parsers extract it, humans never see it. Pack JD keywords that would look unnatural in visible text. Adjust only for a known target ATS; with none identified (human-only review, direct email), the default's keywords stand. Greenhouse-class ATSs surface extracted text to recruiters, so keep it defensible: canonical forms and acronym expansions of skills the visible resume already claims.
-- `meta.subject` and `meta.keywords`: PDF metadata in `\hypersetup{}`, also invisible and machine-readable. Role title, key skills, industry terms.
+- `meta.subject` and `meta.keywords`: PDF metadata in `\hypersetup{}`, invisible and machine-readable. This is the standing invisible layer on every resume: role title, key skills, industry terms. Always safe, always on.
+- `basics.ats_optimization`: an invisible keyword line via `\atsKeywords{}` (hard-capped at 13 words). Off by default. Deploy it only when `research.md` confirms a literal-keyword-gate ATS (Taleo, PageUp, legacy Workday), where dictionary matching rewards it and no content-integrity scan runs. Leave it off for Greenhouse, modern Workday, iCIMS, SmartRecruiters, Ashby, and Lever — they strip, flag, or surface extracted text to a human, so the line runs from wasted to damaging. When deployed, keep it defensible regardless: canonical forms and acronym expansions of skills the visible resume already claims.
 
 ## ATS specifics
 

@@ -2,7 +2,7 @@
 name: gap-analyzer
 description: Compares a rendered resume against an opportunity's requirements and the career.md source of truth to identify gaps — things the opportunity asks for that career.md has material for, but the resume does not surface. Use after generating a resume to find actionable additions before submission.
 tools: Read, Glob, Grep
-model: haiku
+model: sonnet
 effort: low
 color: cyan
 ---
