@@ -1,9 +1,9 @@
 ---
 name: assess
-description: Score one or more job opportunities (URL, pasted JD, or opportunity folder path) against career.md and preferences.md. Outputs verdict (Apply / Maybe / Skip) with V/P/EV scores and evidence in chat. For triage before deciding whether to pursue.
+description: "Score one or more job opportunities (URL, pasted JD, or opportunity folder) for whether to apply. Produces a V (value to the candidate) and P (probability of getting it) score, an EV ranking, and an Apply/Maybe/Skip verdict backed by cited evidence. Use to triage before pursuing."
 argument-hint: <url-or-path-or-paste> [more...]
 disable-model-invocation: false
-allowed-tools: Read, WebSearch, WebFetch, Glob, Grep, Bash(python3 *), Bash(co tracker read *)
+allowed-tools: Read, Glob, Grep, Bash(python3 *), Bash(co fetch-jd *), Bash(co tracker read *)
 model: opus
 effort: high
 ---
@@ -14,81 +14,67 @@ $ARGUMENTS
 
 ## Intent
 
-Quick-fidelity triage. Produce a verdict (Apply / Maybe / Skip) per opportunity, backed by 7 dimension scores and evidence quotes, so the user can decide whether to pursue without reading every JD end-to-end.
+Quick triage. Per opportunity, produce a verdict (Apply / Maybe / Skip) backed by two scores: **V**, how good the role is for the candidate, and **P**, how likely the candidate is to get it. The scores let a batch be sorted by EV so the worthwhile ones surface without reading every JD end to end.
 
-Outcome-agnostic scoring: the LLM judges each dimension independently with a cited evidence span; arithmetic (V, P, EV, verdict) is done in deterministic inline python via Bash. The model never computes the final number in its head — that prevents subconscious bias from a desired verdict shaping the dimension scores.
+Score each dimension on its own evidence, then compute the verdict with deterministic python, never in your head. The arithmetic is what stops a wanted verdict from bending the dimension scores.
 
 ## Inputs
 
 Per opportunity, any of:
-- A URL → fetch via WebFetch.
-- A screenshot or image of a JD attached to the conversation → read the JD from it.
-- Pasted JD text inside `$ARGUMENTS`.
-- A file path or opportunity folder path → Read. For an opportunity folder, read every file in it except `artifacts/`: `job-description.md` is the JD; `research.md` and other notes ground the scores with researched evidence. When the folder nests under an organisation folder, shared files one level up (research, correspondence) are context too.
 
-`$ARGUMENTS` may contain multiple opportunities, mixed types, and conversational filler around them. Parse intent, isolate the JDs.
+- A URL → fetch the JD verbatim with `co fetch-jd <url>`; if it gives up, ask for a paste.
+- A pasted JD, or a screenshot/image of one → read it directly.
+- An opportunity folder → read everything in it (JD, recon, notes), plus shared organisation-level files one level up. A recon'd folder is a second-pass verdict: recon grounds the dimensions a JD alone cannot.
 
-A researched folder makes this a second-pass verdict: research evidence feeds the dimensions the JD alone can't ground (comp, team reality, hiring process), and citations name `research.md` as their source like any other.
-
-For every run, also read:
-- `career.md` at repo root (candidate background, source of truth).
-- `preferences.md` at repo root (floors, walk-aways, situational overrides).
-- The tracker: search it for each organisation (`co tracker read | grep -i <organisation>`); on a hit, surface the prior application (role, date, status) in Notes.
-
-If `preferences.md` doesn't exist, fall back to defaults below and flag in the output that preferences-grounding is missing — V2 and V4 scores will be guesswork without it.
+For every run also read `career.md` (the candidate, source of truth) and `preferences.md` (floors, walk-aways, situational scoring). Search the tracker per organisation (`co tracker read | grep -i <organisation>`); on a hit, surface the prior application in the notes. If `preferences.md` is missing or thin on a dimension, say so and do not invent fit.
 
 ## Rubric
 
-Seven dimensions. Score each 0–4 with one evidence quote (from the JD, career.md, or preferences.md) that anchors the score. Score dimensions **independently** — do not let a prior dimension's score bias the next one. If two dimensions feel coupled, score them in separate passes mentally.
+Seven dimensions, each scored 0–4 with one evidence quote (from the JD, `career.md`, `preferences.md`, or recon). Score them **independently**, not letting one dimension's score pull the next. Reserve **0 for a genuine absence or disqualifier, never for "the JD didn't say"**: missing evidence is *unknown*, flagged for recon, never a silent zero.
 
-Anchors:
-- **0**: missing evidence or disqualifying signal.
-- **1**: present but weak.
-- **2**: meets the bar.
-- **3**: above the bar.
-- **4**: standout / well above.
+Anchors: 0 absent or disqualifying · 1 weak · 2 meets the bar · 3 above · 4 standout.
 
-Reserve 0 for genuine absence or disqualification — not "low." A 0 in any P-dimension typically means the opportunity is unwinnable on that axis.
+**Value: how good the role is for the candidate**
 
-### Value side (V1–V4)
+- **V1 Role substance**: skill variety, autonomy, ownership, and real feedback loops in the work. Autonomy and feedback are the strongest drivers.
+- **V2 Needs-supplies fit**: does the work match what *this* candidate wants (`preferences.md` "what you want" plus `career.md` About)? The strongest predictor of satisfaction, and the easiest to over-read from a JD: score it conservatively and never inflate it when `preferences.md` is thin.
+- **V3 Sustainability**: demands versus resources: workload realism, on-call shape, team support. A low score is a burnout risk, and is **surfaced prominently in the notes**. A great-fit role with no resourcing is a trap, not a win, and a strong V1 or V2 never buys that back.
+- **V4 Total rewards**: comp, location, and remote against the candidate's floor. Near-binary (below floor / meets / above); never let comp lead the verdict.
 
-- **V1 Role substance** — skill variety, autonomy, ownership, feedback loops in the actual work. [Job Characteristics Model; Humphrey, Nahrgang & Morgeson 2007]
-- **V2 Needs-supplies fit** — does this job match what *this* candidate explicitly wants (per preferences.md "What you want from a role" + career.md About)? [Kristof-Brown, Zimmerman & Johnson 2005]
-- **V3 Demands-resources balance** — workload realism, on-call shape, sustainability. Red-flag phrases ("wear many hats", "fast-paced startup", vague unlimited scope) lower this; explicit supportive language raises it. [Job Demands-Resources; Bakker & Demerouti 2017]
-- **V4 Total rewards** — comp + location/remote + benefits vs the candidate's floor in preferences.md. Pay correlates weakly with satisfaction (Judge et al. 2010, r≈0.15), so score this as a near-binary band: 0 below floor, 2 meets floor, 3 above floor, 4 well above.
+**Probability: how likely the candidate is to get it**
 
-### Probability side (P1–P3)
+- **P1 Demands-abilities fit**: does the candidate plausibly clear the bar? Listed requirements are wish-lists, not gates: score **2 at roughly half of them met**, and reserve 0–1 only for a genuine disqualifier (no work rights, a categorical level mismatch), flagged in the notes rather than left to quietly sink the role.
+- **P2 Surface match**: keyword, title, and recency overlap: the ATS-parse and seven-second-scan proxy.
+- **P3 Differentiation**: quantified achievements, named systems, evidence of above-typical performance. The strongest real signal in the candidate's favour.
 
-- **P1 Demands-abilities fit** — hard requirements (skills, years, level, domain) the candidate actually meets. [Kristof-Brown D-A; Sackett, Zhang, Berry & Lievens 2022]
-- **P2 Surface match** — keyword overlap, role-title alignment, recency. Proxy for ATS parsing and the 7-second recruiter scan. [Bertrand & Mullainathan 2004; audit-study literature]
-- **P3 Differentiation** — quantified achievements, named systems, evidence of above-bar performance versus typical applicants. [Selection-validity proxy; Sackett 2022]
+A known **referral or warm intro** is the single biggest real lever on P; when the user supplies one, raise P toward Apply and note it. The single biggest lever on **V**, who the candidate would report to and the team, is usually invisible at triage: name it as the top thing recon should surface, and weigh it at the second pass.
 
 ## Defaults
 
 ```
-V weights:  V1=0.25  V2=0.40  V3=0.20  V4=0.15
-P weights:  P1=0.50  P2=0.30  P3=0.20
+V weights:  V1=0.30  V2=0.30  V3=0.25  V4=0.15
+P weights:  P1=0.35  P2=0.30  P3=0.35
 Verdict:    Apply if V >= 2.0 AND P >= 2.0
             Maybe if V >= 2.0 OR  P >= 2.0
             Skip  otherwise
+EV = V * P, a coarse ranking key for ordering a batch, never the verdict itself.
 ```
 
-If `preferences.md` has a "Situational scoring overrides" section, use those values instead. Be explicit in the output about which weights/thresholds were used.
+If `preferences.md` has a "Situational scoring overrides" section, use those weights and thresholds instead, and say which you used.
 
 ## Aggregation
 
-After scoring all 7 dimensions for one opportunity, compute V, P, EV, and verdict via inline python — do not eyeball the math. Substitute the actual scores; keep weights/thresholds as the defaults above unless preferences.md overrides them.
+After scoring all seven dimensions, compute V, P, EV, and the verdict in one python block. Do not eyeball it.
 
 ```bash
 python3 -c "
 v1, v2, v3, v4 = ?, ?, ?, ?
-p1, p2, p3 = ?, ?, ?
-vw = (0.25, 0.40, 0.20, 0.15)
-pw = (0.50, 0.30, 0.20)
+p1, p2, p3     = ?, ?, ?
+vw = (0.30, 0.30, 0.25, 0.15)
+pw = (0.35, 0.30, 0.35)
 av, ap, mm = 2.0, 2.0, 2.0   # apply_v, apply_p, maybe_min
-
-V  = vw[0]*v1 + vw[1]*v2 + vw[2]*v3 + vw[3]*v4
-P  = pw[0]*p1 + pw[1]*p2 + pw[2]*p3
+V  = sum(w*s for w, s in zip(vw, (v1, v2, v3, v4)))
+P  = sum(w*s for w, s in zip(pw, (p1, p2, p3)))
 EV = V * P
 verdict = ('Apply' if V >= av and P >= ap else
            'Maybe' if max(V, P) >= mm else
@@ -97,57 +83,63 @@ print(f'V={V:.2f}  P={P:.2f}  EV={EV:.2f}  verdict={verdict}')
 "
 ```
 
-For multiple opportunities, run this once per opportunity (or fold into a single python block printing one line per opportunity if there are many — your call).
+For several opportunities, run it once each, or fold them into one block printing a line apiece.
+
+## The verdict is the caller's signal
+
+The verdict is what the caller acts on, and the caller may be the user or the funnel (which drops Skips early), so it must be decisive where the evidence is decisive and cautious only where the call is genuinely close.
+
+- A clear non-match, low value and low odds on solid evidence, is a confident **Skip**. Most blindly-submitted URLs are these; do not soften an obvious no into Maybe.
+- Reserve the caution for the genuinely close call: when a score sits near a threshold, or the JD is too thin to score with confidence, lean **Maybe** rather than a silent Skip, because a wrongly-dropped good role is never seen again.
+- A single weak dimension does not sink a role the rest of the evidence supports; surface it as a flagged concern in the notes and let the weighted verdict stand. The skill flags; the caller decides.
+- EV orders a batch coarsely; small EV gaps are noise, not a precise ranking.
 
 ## Output format
 
 ### Single opportunity
 
 ```
-# Assess: <opportunity name or URL>
+# Assess: <name or URL>
 
 **Verdict: <Apply / Maybe / Skip>**
 V = <X.XX>   P = <X.XX>   EV = <X.XX>
 
 | Dim | Score | Evidence |
 |---|---|---|
-| V1 Role substance      | <0-4> | "..." (source) |
-| V2 Needs-supplies fit  | <0-4> | "..." (source) |
-| V3 Demands-resources   | <0-4> | "..." (source) |
-| V4 Total rewards       | <0-4> | "..." (source) |
-| P1 Demands-abilities   | <0-4> | "..." (source) |
-| P2 Surface match       | <0-4> | "..." (source) |
-| P3 Differentiation     | <0-4> | "..." (source) |
+| V1 Role substance     | <0-4> | "..." (source) |
+| V2 Needs-supplies fit | <0-4> | "..." (source) |
+| V3 Sustainability     | <0-4> | "..." (source) |
+| V4 Total rewards      | <0-4> | "..." (source) |
+| P1 Demands-abilities  | <0-4> | "..." (source) |
+| P2 Surface match      | <0-4> | "..." (source) |
+| P3 Differentiation    | <0-4> | "..." (source) |
 
 ## Reasoning
-<3-5 sentences synthesising the verdict, surfacing the load-bearing signals.>
+<3-5 sentences on the load-bearing signals behind the verdict.>
 
 ## Notes
-<Red flags, missing data, any deviation from default weights/thresholds and why.>
+<Flagged concerns (low sustainability, a disqualifier, a thin JD), missing data routed to recon, tracker history, and which weights/thresholds were used.>
 ```
 
 ### Multiple opportunities
 
-Prepend a ranking, then the per-opportunity blocks:
+Prepend a ranking by EV, then the per-opportunity blocks in ranked order.
 
 ```
 # Assess: <N> opportunities
 
-## Ranking (by EV, then by P)
-
-1. <name>: EV=X.XX  (V=Y.YY / P=Z.ZZ) — <verdict>
+## Ranking (by EV)
+1. <name>: EV=X.XX  (V=Y.YY / P=Z.ZZ), <verdict>
 2. ...
 
 ## Detail
-
-<single-opportunity block per opportunity, in ranked order>
+<one single-opportunity block each, in ranked order>
 ```
 
 ## Anti-patterns
 
-- **Scoring without evidence.** Every dimension needs a citation. No exceptions.
-- **Verdict-first reasoning.** Score the dimensions before running the math. If you have a gut verdict before scoring, score harder against it as a check.
-- **Inferring P from JD vibes.** P1 is concrete D-A matching against career.md, not "feels like a good fit."
-- **Over-scoring V4 (comp).** Pay weakly predicts satisfaction. Use it as a floor check, not a leading signal.
-- **Hallucinating fit when preferences.md is missing data.** If a section is empty or stubbed, say "no preferences-grounding for this dimension" in the Notes rather than inventing fit.
-- **Em-dashes in prose output.** Use periods, commas, colons, semicolons. (Per `.claude/rules/anti-patterns.local.md`.)
+- **Scoring without evidence.** Every dimension needs a cited quote.
+- **Verdict-first reasoning.** Score before the math; if you feel a verdict coming, score harder against it.
+- **Treating a JD's requirement list as hard gates.** They are wish-lists; roughly half met clears the bar.
+- **Silent Skips on uncertainty.** A clear non-match is a confident Skip, but never let a thin JD or one weak dimension quietly drop a role the evidence does not clearly rule out; lean Maybe and surface the reason.
+- **Comp or halo inflation.** Pay barely predicts satisfaction, and needs-supplies fit is the easiest score to over-read; never let either carry a verdict.

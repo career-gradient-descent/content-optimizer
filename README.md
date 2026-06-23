@@ -6,7 +6,7 @@
 
 </div>
 
-A per-opportunity career-marketing pipeline for resumes, cover letters, outreach, and application Q&A. Half of it is deterministic: YAML schemas, Jinja+LaTeX, ATS-aware PDF rendering, a small Python CLI you can audit line by line. Half is stochastic: Claude Code skills that triage opportunities, draft from your profile, and stress-test the result before you send it.
+A per-opportunity career-marketing pipeline for resumes, cover letters, application answers, and outreach. Half of it is deterministic: YAML schemas, Jinja+LaTeX, ATS-aware PDF rendering, a small Python CLI you can audit line by line. Half is stochastic: Claude Code skills that triage opportunities, research them, draft from your profile, and stress-test the result before you send it.
 
 ## The model
 
@@ -22,19 +22,21 @@ The cost is front-loaded and real. Half a workday on `career.md` is the honest f
 
 ## The pipeline
 
-> **`/assess` → set up → `/research-opportunity` → `/create-artifact` → `/vet` → submit**
+> **`/assess` → set up → `/recon` → `/create` → `/vet` → submit**
 
 | Stage | You say | Result |
 |---|---|---|
-| **Triage** | `/assess <url, text, or several>` | Apply / Maybe / Skip per JD, scored against your profile |
+| **Triage** | `/assess <url, text, or several>` | Apply / Maybe / Skip per JD, with V/P/EV scores against your profile |
 | **Set up** | *"set up an opportunity for `<url>`"* | Folder scaffolded, JD pulled in, row logged in your tracker |
-| **Research** *(opt.)* | `/research-opportunity <folder>` | `research.md`: company, team, ATS, people |
-| **Generate** | `/create-artifact resume <folder>` | Tailored resume or cover letter, YAML → PDF |
-| **Vet** *(opt.)* | `/vet <slug>` | Parallel ATS, recruiter-funnel, and gap reports |
+| **Recon** *(opt.)* | `/recon <folder>` | First-party source resolved; `recon.md`, `org-recon.md`, `questions.md`, `targets.md` |
+| **Create** | `/create <folder>` | Tailored resume + cover letter by default, plus answers and outreach when recon supplies them |
+| **Vet** *(opt.)* | `/vet <slug>` | Five-agent adversarial panel, condensed to a few actionable notes with the obvious fixes already applied |
+
+Run a single stage at will, or hand a whole batch to **`/funnel`**, which composes the stages end to end: triage, setup, recon, a second-pass triage, creation, and vetting, finishing in an action sheet.
 
 JD extraction is deterministic where the page allows. JS-heavy ATS pages (much of Workday, Ashby) you paste by hand.
 
-Everything around the edges is plain conversation, grounded in the same context files: application Q&A, outreach and follow-up emails, *"have I applied here before?"*, *"what's stalled in my pipeline?"*. Those last two read straight from `tracker.xlsx`, the state you keep by hand; Claude reads it freely and edits a cell only at your word, with your spreadsheet's own dropdown rules enforced.
+Everything around the edges is plain conversation, grounded in the same context files: follow-up emails, *"have I applied here before?"*, *"what's stalled in my pipeline?"*. Those last two read straight from `tracker.xlsx`, the state you keep by hand; Claude reads it freely and edits a cell only at your word, with your spreadsheet's own dropdown rules enforced.
 
 ## Requirements
 
@@ -72,8 +74,7 @@ Look at @preferences.md.example and help me set up my preferences file.
 |---|---|---|
 | `career.md` | Your full profile, the source every artifact draws from | **High, upfront** |
 | `preferences.md` | Floors, walk-aways, situational scoring for triage | Medium |
-| `.claude/rules/writing-style.local.md` | Your voice and conventions *(optional)* | Low, ongoing |
-| `.claude/rules/anti-patterns.local.md` | Phrasings to never produce *(optional)* | Low, ongoing |
+| `.claude/skills/create/voice.local.md` | Your voice, conventions, and phrasings to never produce *(optional)* | Low, ongoing |
 | `tracker.xlsx` | Application state: `cp tracker.xlsx.example tracker.xlsx`, then maintain it in your spreadsheet app | Ongoing |
 
 Be ruthless about depth in `career.md`. Every role, project, mark, publication, side quest: what you owned, what you wrestled with, what you'd do differently.
@@ -83,7 +84,7 @@ Be ruthless about depth in `career.md`. Every role, project, mark, publication, 
 
 <br>
 
-`create-artifact` works best when `defaults/resume.yaml` holds a clean, opportunity-agnostic version of your resume in your usual voice and structure. Per-opportunity artifacts then become *tactical edits* of that baseline rather than greenfield rewrites, which is what keeps every resume from reading as machine-made. Generate one well, save it as the default, refine over time. Without it, generation still works; it just starts from scratch each time.
+`create` works best when `defaults/resume.yaml` holds a clean, opportunity-agnostic version of your resume in your usual voice and structure. Per-opportunity artifacts then become *tactical edits* of that baseline rather than greenfield rewrites, which is what keeps every resume from reading as machine-made. Generate one well, save it as the default, refine over time. Without it, generation still works; it just starts from scratch each time.
 
 </details>
 

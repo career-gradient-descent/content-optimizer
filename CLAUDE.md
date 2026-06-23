@@ -1,32 +1,52 @@
 # Content Optimizer
 
-Toolkit for producing career marketing artifacts (resumes, cover letters, outreach) tailored per opportunity. User-facing overview: `README.md`.
+A per-opportunity pipeline for career-marketing artifacts. It is reductive: it selects, arranges, and polishes the candidate's real material for a specific opportunity, rather than generating new claims. Deterministic mechanics live in the `co` CLI; judgment lives in the skills and agents.
 
-## The opportunity is the unit
+## Vocabulary
 
-Each pursuit lives at `opportunities/<slug>/`, holding `job-description.md` (YAML frontmatter + body), an optional `research.md`, and an `artifacts/` subfolder for generated content.
+- **Organisation**: a company or recruiting agency. The parent; holds context shared across its opportunities.
+- **Opportunity**: a specific demand being pursued, usually a job opening. The unit of work.
+- **Job description (JD)**: the verbatim, ground-truth text of an opportunity's posting.
+- **Recon**: decision-relevant intel gathered about an opportunity and its organisation to inform its artifacts.
+- **Signal**: a recon finding that informs an artifact decision, expressed as a fact, never as an instruction on how to write.
+- **Target**: an outreach recipient or channel identified by recon (a person, a post, an email).
+- **Artifact**: anything the pipeline produces for an opportunity to submit or act on: resume, cover letter, application answers, outreach actions.
+- **Outreach action**: a drafted, ready-to-send message aimed at a target. The pipeline drafts it; the user sends it.
 
-When one organisation has several roles, nest them under a shared org folder: `opportunities/<org>/<role>/`. Company research and people belong at the org level — `research.md`, an `outreach/` folder, correspondence — written once and read from one level up; each role folder holds only its own `job-description.md` and `artifacts/`. A lone role can stay flat at `opportunities/<slug>/`.
+## The opportunity folder
+
+Every opportunity lives at `opportunities/<organisation>/<opportunity>/`, always nested. The folder is the pursuit's source of truth, held on disk rather than in conversation. A fully-populated pursuit:
+
+```
+opportunities/
+  <ORGANISATION>/             # an organisation
+    org-recon.md              # recon shared across the organisation's opportunities
+    <ROLE>/                   # an opportunity
+      job-description.md      # the JD
+      recon.md                # recon for this opportunity
+      questions.md            # application-page questions
+      targets.md              # outreach targets
+      artifacts/              # everything produced to submit or send
+        resume.pdf
+        cover-letter.pdf
+        answers.md
+        outreach.md
+```
+
+Knowledge sits inside the opportunity folder; produced deliverables go inside its `artifacts/` subfolder; anything shared across an organisation's opportunities sits in the organisation folder, next to them.
+
+## The pipeline
+
+Each pursuit moves through stages, each its own skill: discovery, triage, recon, artifact creation, and vetting, with the funnel composing them over a batch. Reach for the skill that matches the work.
 
 ## Source of truth
 
-- `career.md`: the full candidate profile; every artifact draws selectively from it.
-- `preferences.md`: floors, walk-aways, and situational scoring used in triage.
-- `tracker.xlsx`: application state. Read it via `co tracker read`; discover its columns and rules via `co tracker schema`; the user maintains it by hand. Writes only on explicit user request, via `co tracker add` / `update` / `set` (the sheet's own dropdown rules are enforced).
-- `.claude/rules/*.md`: voice and anti-patterns, auto-loaded.
+The user maintains these by hand. Read them freely; edit only the tracker, and only when the user asks.
 
-## CLI
+- **`career.md`**: the candidate's full profile. Every claim in an artifact traces back to it exactly.
+- **`preferences.md`**: floors, walk-aways, and situational scoring that ground triage.
+- **`tracker.xlsx`**: application state, read via `co tracker read`.
 
-Deterministic `co` commands: `new-opportunity`, `fetch-jd`, `render`, `archive`, `tracker`. Setting up an opportunity composes two of them: `new-opportunity` scaffolds the folder, `fetch-jd` pulls the JD body. Usage, flags, behavior, and the setup cases live in `cli/README.md`; read it before invoking, or run `co <command> --help`.
+## Tools
 
-## Pipeline
-
-The heavy stages are skills, slash-invocable and model-invocable alike: `/assess` (triage), `/research-opportunity`, `/create-artifact`, `/vet`. `/funnel` chains them over a batch, end to end. Invoke the matching skill when a request plainly calls for a stage; suggest the slash form when the user seems unaware of it. Everything else (application Q&A, outreach, emails, pipeline queries against the tracker) is ordinary conversation grounded in the source-of-truth files above.
-
-The tracker follows the pursuit: when an opportunity is set up, offer to log its row (`co tracker add`); when the user reports an event ("applied", "rejected", "interview booked"), update the row (`co tracker update --match`); when rows go dead (Rejected, Ghosted, Withdrawn), suggest `co archive <slug>`.
-
-## Operating mode
-
-Most chats are 'use chats': research, artifact generation, vetting, application support. Writes go inside `opportunities/<slug>/`; reads elsewhere are fine.
-
-The workbench itself (CLI, skills, agents, rules, this file) is shaped in dedicated 'sharpening chats'. If a 'use chat' strays into modifying it, surface what you're about to touch first.
+`co` is the project's CLI: deterministic, auditable primitives for the mechanical steps (scaffolding, JD fetch, rendering, the tracker). Read `cli/README.md` or run `co <command> --help` before using it, and prefer this deterministic path for anything that must be exact.

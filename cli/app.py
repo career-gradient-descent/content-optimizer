@@ -1,11 +1,13 @@
 """ CLI application. """
 
+import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated
 
 import typer
 import yaml
+from pydantic import ValidationError
 
 from cli.core import CompilationError, compile_tex, populate_jinja_template
 from cli.fetch import FetchError, fetch_jd_markdown
@@ -43,6 +45,18 @@ def _detect_ats(url: str) -> str:
     return next((name for pattern, name in ATS_URL_PATTERNS.items() if pattern in url), "")
 
 
+def _opportunity_folder(slug: str) -> Path:
+    """ Resolve an opportunity slug to its folder under opportunities/, jailed: an
+    absolute slug or one with `..` that would escape the tree is refused, so a stray
+    path can never create or move a folder outside opportunities/. """
+    folder = Path("opportunities") / slug
+    root = Path("opportunities").resolve()
+    if Path(os.path.normpath(folder)).is_absolute() or not folder.resolve().is_relative_to(root):
+        typer.echo(f"new-opportunity: slug must stay under opportunities/, got {slug!r}", err=True)
+        raise typer.Exit(1)
+    return folder
+
+
 def _emit_frontmatter(fields: dict[str, str]) -> str:
     """ YAML frontmatter where empty values render as `key:` (no `''` clutter). """
     lines = [
@@ -54,7 +68,7 @@ def _emit_frontmatter(fields: dict[str, str]) -> str:
 
 @app.command("new-opportunity")
 def new_opportunity(
-    slug            : Annotated[str, typer.Argument(help="Opportunity slug")],
+    slug            : Annotated[str, typer.Argument(help="Opportunity slug, nested <organisation>/<opportunity>")],
     role            : Annotated[str, typer.Option(help="Job title")] = "",
     organisation    : Annotated[str, typer.Option(help="Company")] = "",
     location        : Annotated[str, typer.Option(help="Location")] = "",
@@ -63,8 +77,11 @@ def new_opportunity(
     comp            : Annotated[str, typer.Option(help="Compensation")] = "",
     effort          : Annotated[str, typer.Option(help="Pursuit effort tier")] = "",
 ) -> None:
-    """ Scaffold a new opportunity folder with empty job-description.md. """
-    folder: Path = Path("opportunities") / slug
+    """ Scaffold a new opportunity folder (nested <organisation>/<opportunity>) with empty job-description.md. """
+    if len([p for p in slug.split("/") if p]) < 2:
+        typer.echo(f"new-opportunity: slug must nest as <organisation>/<opportunity>, got {slug!r}", err=True)
+        raise typer.Exit(1)
+    folder: Path = _opportunity_folder(slug)
     if folder.exists():
         typer.echo(f"new-opportunity: {folder} already exists", err=True)
         raise typer.Exit(1)
@@ -101,12 +118,17 @@ def render(
     template: Annotated[str, typer.Option("-t", help="Template name")] = "primary",
 ) -> None:
     """ Render PDF. YAML triggers full pipeline; TEX recompiles. """
-    if file.suffix == ".tex":
+    if file.suffix.lower() == ".tex":
         tex : Path = file
     else:
         tex : Path = file.with_suffix(".tex")
+        try:
+            rendered : str = populate_jinja_template(yaml.safe_load(file.read_text()), file.stem, template)
+        except (OSError, ValidationError, yaml.YAMLError, KeyError) as exc:
+            typer.echo(f"render: {exc}", err=True)
+            raise typer.Exit(1)
         tex.parent.mkdir(parents=True, exist_ok=True)
-        tex.write_text(populate_jinja_template(yaml.safe_load(file.read_text()), file.stem, template))
+        tex.write_text(rendered)
     try:
         pdf : Path = compile_tex(tex)
     except CompilationError as exc:
@@ -181,7 +203,7 @@ def archive(
     slug: Annotated[str, typer.Argument(help="Opportunity slug")],
 ) -> None:
     """ Move an opportunity folder into opportunities/.archive/. """
-    src : Path = Path("opportunities") / slug
+    src : Path = _opportunity_folder(slug)
     if not src.is_dir():
         typer.echo(f"archive: no opportunity at {src}", err=True)
         raise typer.Exit(1)

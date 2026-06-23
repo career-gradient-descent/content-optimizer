@@ -29,7 +29,7 @@ Anticipated failures (a JS-rendered page, a missing file, a broken `.tex`) exit 
 co new-opportunity <slug> [--role ...] [--organisation ...] [--location ...] [--url ...] [--ats ...] [--comp ...] [--effort ...]
 ```
 
-Creates `opportunities/<slug>/` with an `artifacts/` subfolder and a `job-description.md` containing only YAML frontmatter (empty body). Flags pre-populate the frontmatter; omitted ones render as empty keys. Slugs may nest: `google/sre-g1`.
+Creates `opportunities/<slug>/` with an `artifacts/` subfolder and a `job-description.md` containing only YAML frontmatter (empty body). Flags pre-populate the frontmatter; omitted ones render as empty keys. The slug MUST nest as `<organisation>/<opportunity>`, mirroring the on-disk layout, for example `google/sre-g1`; a flat slug exits non-zero and changes nothing.
 
 - `--ats` is auto-detected from `--url` when recognizable (Greenhouse, Ashby, Lever, Workday, iCIMS, SmartRecruiters, Taleo, PageUp).
 - Refuses to clobber: if the folder already exists, it exits non-zero and changes nothing.

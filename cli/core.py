@@ -35,6 +35,8 @@ def _bold_substring(text: str, substring: str | None) -> str:
 def populate_jinja_template(data: dict, entity: str, template: str = "primary") -> str:
     """ Validate data and populate the LaTeX Jinja template for the given entity. """
 
+    if entity not in schemas:
+        raise KeyError(f"unknown entity {entity!r}; known: {', '.join(schemas)}")
     schema      : type[Schema]  = schemas[entity]
     validated   : Schema        = schema.model_validate(data)
     template_dir: Path          = TEMPLATE_DIR / entity
@@ -73,15 +75,18 @@ def compile_tex(tex: Path) -> Path:
     tex = tex.resolve()  # docker volume mount requires absolute host path
     pdf = tex.with_suffix(".pdf")
 
-    result = subprocess.run(
-        args=[
-            "docker", "run", "--rm", "-v", f"{tex.parent}:/work", "-w", "/work",
-            LATEX_DOCKER_IMAGE, "pdflatex", "-interaction=nonstopmode", tex.name,
-        ],
-        capture_output=True,
-        text=True,
-        check=False
-    )
+    try:
+        result = subprocess.run(
+            args=[
+                "docker", "run", "--rm", "-v", f"{tex.parent}:/work", "-w", "/work",
+                LATEX_DOCKER_IMAGE, "pdflatex", "-interaction=nonstopmode", tex.name,
+            ],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+    except FileNotFoundError:
+        raise CompilationError("docker not found; install Docker to render PDFs")
 
     log_errors = _extract_log_errors(tex.with_suffix(".log"))
 
