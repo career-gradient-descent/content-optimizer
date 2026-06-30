@@ -1,9 +1,9 @@
 ---
 name: assess
-description: "Score one or more job opportunities (URL, pasted JD, or opportunity folder) for whether to apply. Produces a V (value to the candidate) and P (probability of getting it) score, an EV ranking, and an Apply/Maybe/Skip verdict backed by cited evidence. Use to triage before pursuing."
-argument-hint: <url-or-path-or-paste> [more...]
+description: "Score one or more job opportunities (a JD URL, or an opportunity folder) for whether to apply. Produces a V (value to the candidate) and P (probability of getting it) score, an EV ranking, and an Apply/Maybe/Skip verdict backed by cited evidence. Use to triage before pursuing."
+argument-hint: <url-or-folder> [more...]
 disable-model-invocation: false
-allowed-tools: Read, Glob, Grep, Bash(python3 *), Bash(co fetch-jd *), Bash(co tracker read *)
+allowed-tools: Read, Glob, Grep, Bash(python3 *), Bash(co fetch-jd *), Bash(co tracker read *), mcp__claude-in-chrome
 model: opus
 effort: high
 ---
@@ -22,9 +22,9 @@ Score each dimension on its own evidence, then compute the verdict with determin
 
 Per opportunity, any of:
 
-- A URL → fetch the JD verbatim with `co fetch-jd <url>`; if it gives up, ask for a paste.
-- A pasted JD, or a screenshot/image of one → read it directly.
-- An opportunity folder → read everything in it (JD, recon, notes), plus shared organisation-level files one level up. A recon'd folder is a second-pass verdict: recon grounds the dimensions a JD alone cannot.
+- **A URL** (preferred) → fetch the JD verbatim with `co fetch-jd <url>`; if it gives up (a JS-rendered page), read the page in the browser. Don't request a paste for a URL — browse it.
+- **An opportunity folder** → read everything in it (JD, recon, notes), plus shared organisation-level files one level up. A recon'd folder is a second-pass verdict: recon grounds the dimensions a JD alone cannot.
+- **A pasted JD or screenshot/image** → a fallback for when there is no URL, or a URL that resists both fetch and browser. Read it directly.
 
 For every run also read `career.md` (the candidate, source of truth) and `preferences.md` (floors, walk-aways, situational scoring). Search the tracker per organisation (`co tracker read | grep -i <organisation>`); on a hit, surface the prior application in the notes. If `preferences.md` is missing or thin on a dimension, say so and do not invent fit.
 

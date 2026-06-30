@@ -5,7 +5,7 @@ import trafilatura
 # Real JDs run to several thousand characters. Partial-render and boilerplate-only
 # extractions were observed at <=751 (JS-rendered pages whose static HTML carries only
 # an app shell or footer). Below this floor we refuse rather than emit low-confidence
-# content, biasing toward manual paste.
+# content, biasing toward the caller's fallback (the browser).
 MIN_EXTRACT_CHARS = 1000
 
 
@@ -26,12 +26,12 @@ def fetch_jd_markdown(url: str) -> str:
 
     markdown = trafilatura.extract(html, output_format="markdown", include_comments=False)
     if not markdown:
-        raise FetchError(f"no content extracted from {url} (likely JS-rendered; paste manually)")
+        raise FetchError(f"no content extracted from {url} (likely JS-rendered)")
 
     if len(markdown) < MIN_EXTRACT_CHARS:
         raise FetchError(
             f"only {len(markdown)} chars extracted from {url}, below the {MIN_EXTRACT_CHARS}-char "
-            f"confidence floor (likely partial render or boilerplate; paste manually)"
+            f"confidence floor (likely partial render or boilerplate)"
         )
 
     return markdown

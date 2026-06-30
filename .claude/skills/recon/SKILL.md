@@ -7,7 +7,7 @@ context: fork
 agent: general-purpose
 model: opus
 effort: xhigh
-allowed-tools: WebSearch, WebFetch, Read, Write, Edit, Glob, Grep, Bash(curl *), Bash(co tracker read *)
+allowed-tools: WebSearch, WebFetch, Read, Write, Edit, Glob, Grep, Bash(curl *), Bash(co tracker read *), mcp__claude-in-chrome
 ---
 
 $ARGUMENTS
@@ -18,15 +18,15 @@ $ARGUMENTS
 
 Resolve the opportunity to its first-party source, then gather the intel and outreach targets that drive create and outreach. Every finding must map to a named downstream decision: a cover-letter line, a resume bullet or facet to surface, an application answer, a target to contact, or a parser constraint. If a fact maps to none of these, do not gather it. Recon produces signals, facts that inform an artifact decision, never instructions on how to arrange or write the artifact.
 
-## Operating architecture: prefer login-free, escalate to the burner when it pays off
+## Operating architecture: prefer login-free, reach for the browser when it pays off
 
 Treat the listing link as a pointer and resolve to the first-party source, reaching for, in order:
 
 - **ATS public JSON APIs** (keyless, un-throttled): the most robust tier.
 - **Logged-out search-engine X-ray** (Google, Bing), which needs no account and sidesteps platform throttles.
-- **First-party careers pages**, read logged out.
+- **First-party careers pages**.
 
-When the login-free tiers come up short, step up the browser: first use a search engine's own advanced search logged out, then log in with a burner account for a platform's native advanced search (LinkedIn, Seek). Burner accounts are cheap and disposable, so use them freely once the cheaper tiers are exhausted; browse private and anonymous to keep the account clean. The earlier tiers are preferred for reliability and simplicity, not because the burner is off-limits: reach for it whenever it is the only thing that gets the result.
+These cheap tiers come first for speed. When they fall short, reach for the browser freely: a search engine's own advanced search, then the native in-app advanced search on LinkedIn or Seek, where Claude's research identity is already signed in.
 
 ## Order of operations (order is leverage here)
 
@@ -51,7 +51,7 @@ The agency or aggregator link is rarely the real source. Resolve it:
   - Ashby: `api.ashbyhq.com/posting-api/job-board/<slug>`
   - Workable: `apply.workable.com/api/v1/widget/accounts/<slug>`
 
-  Do not assume the token equals the company name; confirm with a live hit. Workday, iCIMS, and Taleo are JS-rendered and poorly indexed, so expect to fall back to the careers page for those.
+  Do not assume the token equals the company name; confirm with a live hit. Workday, iCIMS, and Taleo are JS-rendered and poorly indexed; read those listings directly in the browser.
 - **Deduce a concealed employer** from a distinctive phrase, a named product or team or reporting line (both near-decisive when present), or a niche tech-stack-plus-city or funding-stage-plus-location shortlist (narrowing only, then confirm). Benefits language and generic jargon do not identify anyone.
 - **Know when to stop.** Spend resolution effort only while the ad offers a distinctive, externally-checkable handle (a phrase, product, person, reporting line, or matching careers page). When three or more dead-end signals cluster (a fully boilerplate JD, a generic location only, "talent pool / EOI / register your interest" framing, several agencies running near-identical ads, board-only existence with no careers-page match), record "unresolvable" and move on; further automated resolution has negative value. A listing on aggregators but absent from the employer's own careers page is a likely ghost (about 1 in 9 in Australia): flag it for triage rather than tailoring against it.
 
@@ -63,9 +63,9 @@ The first-party source carries the fuller, cleaner JD (better keyword tailoring)
 
 ## Outreach targets
 
-Identify, do not contact: recon surfaces targets with evidence, and the candidate acts later from their own real, well-connected account. Per target, capture name, role, organisation, **agency or internal**, evidence (a post URL and date, a Meet-the-Hiring-Team listing, or a People-tab find), recency, a specific true **personalization hook**, and a **warm-path flag** ("check own network for a connection to this person"), since the burner cannot see the candidate's real network.
+Identify, do not contact: recon surfaces targets with evidence, and the candidate acts later from their own real, well-connected account. Per target, capture name, role, organisation, **agency or internal**, evidence (a post URL and date, a Meet-the-Hiring-Team listing, or a People-tab find), recency, a specific true **personalization hook**, and a **warm-path flag** ("check own network for a connection to this person"), since Claude's research identity is not connected to the candidate's real network.
 
-- **The highest-value find is anyone who publicly posted about this opening,** preferably recent: a fresh "we're hiring" post identifies a receptive, reachable human, often before the listing floods. Recency is load-bearing; a months-old post is near-worthless. Prefer logged-out X-ray (`site:linkedin.com/posts "we're hiring" "<role>" "<company>"`, with a recent-date filter), and fall back to the burner's in-app Posts search when X-ray comes up short. This LinkedIn hunt is browser work: if the browser tier is genuinely unavailable, record that gap in `targets.md` rather than reporting that no targets exist from a search you could not actually run.
+- **The highest-value find is anyone who publicly posted about this opening,** preferably recent: a fresh "we're hiring" post identifies a receptive, reachable human, often before the listing floods. Recency is load-bearing; a months-old post is near-worthless. Prefer logged-out X-ray (`site:linkedin.com/posts "we're hiring" "<role>" "<company>"`, with a recent-date filter), and fall back to the browser's in-app Posts search when X-ray comes up short. If that search can't complete (rate-limited or walled), record the gap in `targets.md` rather than reporting no targets from a search you did not run.
 - **Classify each opening agency or internal,** because Australian tech is heavily agency-run and it flips the target. Agency (anonymized employer, a recruiter named in the post, Seek agency branding) means the posting recruiter is the right target, since placing the candidate is their payday. Internal (named company, careers-page ATS link, an engineering-manager or talent poster) means the hiring manager and team, with internal talent as secondary.
 - **Use the LinkedIn Meet-the-Hiring-Team block and the company People tab** (filter by title) to find the hiring manager, team, and recruiter when no post exists.
 - **Never surface a target without a hook.** A target the candidate could only approach generically is a reputational liability on a real account.

@@ -44,7 +44,7 @@ co fetch-jd <url>
 
 Fetches the page and extracts the main content to markdown, deterministically and with no LLM, so the JD lands word-for-word instead of paraphrased. Prints to stdout.
 
-- **Gives up loudly** rather than guessing. JS-rendered pages (much of Workday, Ashby) and pages that yield too little to trust exit non-zero with a "paste manually" message. The clean give-up is the feature: it never writes a half-extracted JD.
+- **Gives up loudly** rather than guessing. JS-rendered pages (much of Workday, Ashby) and pages that yield too little to trust exit non-zero rather than emit a half-extracted JD. The clean give-up is the feature: the caller (a skill) then reads the page in the browser.
 - Static ATS pages (Greenhouse, Lever, Seek, most company boards) extract cleanly.
 
 ## `render`
@@ -106,10 +106,10 @@ Scaffolding a folder and populating its JD are deliberately **two commands**, be
 | You have | Flow |
 |---|---|
 | URL, static page | `fetch-jd <url>` → read it for role/org/comp → `new-opportunity <slug> --flags` → drop the fetched body into `job-description.md` |
-| URL, JS-rendered page | `fetch-jd` gives up → `new-opportunity <slug> --flags` → paste the JD body by hand |
-| Pasted JD text, no URL | `new-opportunity <slug> --flags` → paste the body |
+| URL, JS-rendered page | `fetch-jd` gives up → read the page in the browser (capture the JD text verbatim, don't paraphrase) → `new-opportunity <slug> --flags` → place the JD body |
+| JD text/screenshot, no URL (fallback) | `new-opportunity <slug> --flags` → place the body |
 | Nothing yet (placeholder) | `new-opportunity <slug>` → fill the JD later |
 
-In a chat you don't run these yourself. You say *"set up an opportunity for `<url>`"* and Claude sequences them: derives the slug, fills the frontmatter from the JD, places the body, and falls back to asking you to paste when extraction gives up. The split keeps each command single-purpose; the sequencing lives here so it's never guessed.
+In a chat you don't run these yourself. You say *"set up an opportunity for `<url>`"* and Claude sequences them: derives the slug, fills the frontmatter from the JD, places the body, and falls back to reading the page in the browser when static extraction gives up. The split keeps each command single-purpose; the sequencing lives here so it's never guessed.
 
 Setup ends by logging the pursuit in the tracker: `co tracker schema` to see the columns, then one `co tracker add` filling the headers that map from frontmatter (organisation, role, location, ATS). The Listing hyperlink stays hand-entered.

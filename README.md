@@ -26,7 +26,7 @@ The cost is front-loaded and real. Half a workday on `career.md` is the honest f
 
 | Stage | You say | Result |
 |---|---|---|
-| **Triage** | `/assess <url, text, or several>` | Apply / Maybe / Skip per JD, with V/P/EV scores against your profile |
+| **Triage** | `/assess <url(s) or folder>` | Apply / Maybe / Skip per JD, with V/P/EV scores against your profile |
 | **Set up** | *"set up an opportunity for `<url>`"* | Folder scaffolded, JD pulled in, row logged in your tracker |
 | **Recon** *(opt.)* | `/recon <folder>` | First-party source resolved; `recon.md`, `org-recon.md`, `questions.md`, `targets.md` |
 | **Create** | `/create <folder>` | Tailored resume + cover letter by default, plus answers and outreach when recon supplies them |
@@ -34,7 +34,7 @@ The cost is front-loaded and real. Half a workday on `career.md` is the honest f
 
 Run a single stage at will, or hand a whole batch to **`/funnel`**, which composes the stages end to end: triage, setup, recon, a second-pass triage, creation, and vetting, finishing in an action sheet.
 
-JD extraction is deterministic where the page allows. JS-heavy ATS pages (much of Workday, Ashby) you paste by hand.
+JD extraction is deterministic where the page allows; JS-heavy ATS pages (much of Workday, Ashby) are read in the browser.
 
 Everything around the edges is plain conversation, grounded in the same context files: follow-up emails, *"have I applied here before?"*, *"what's stalled in my pipeline?"*. Those last two read straight from `tracker.xlsx`, the state you keep by hand; Claude reads it freely and edits a cell only at your word, with your spreadsheet's own dropdown rules enforced.
 

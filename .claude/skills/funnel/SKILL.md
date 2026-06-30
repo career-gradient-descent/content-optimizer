@@ -1,9 +1,9 @@
 ---
 name: funnel
-description: "Take a batch of job opportunities (URLs, screenshots, pasted JDs, or existing opportunity folders) through the whole pipeline: triage, setup, recon, second-pass triage, artifact creation, and vetting, ending in an action sheet. Use when several opportunities arrive at once, or when the user wants end-to-end processing rather than a single stage."
-argument-hint: <urls, pasted JDs, folder paths, or "continue">
+description: "Take a batch of job opportunities (JD URLs or existing opportunity folders) through the whole pipeline: triage, setup, recon, second-pass triage, artifact creation, and vetting, ending in an action sheet. Use when several opportunities arrive at once, or when the user wants end-to-end processing rather than a single stage."
+argument-hint: <urls, folder paths, or "continue">
 disable-model-invocation: false
-allowed-tools: Skill(assess), Skill(recon), Skill(create), Skill(vet), Read, Glob, Grep, Bash(co *)
+allowed-tools: Skill(assess), Skill(recon), Skill(create), Skill(vet), Read, Glob, Grep, Bash(co *), mcp__claude-in-chrome
 ---
 
 $ARGUMENTS
@@ -25,7 +25,7 @@ State on disk is authoritative: folder presence, the JD frontmatter, the recon f
 
 ## Stages
 
-**1. Intake.** Accept a batch in any mix: fetchable URLs, screenshots, pasted JD text, pre-made folders. Create nothing yet. (Discovering new opportunities is a separate front door; the funnel runs from whatever it is handed.)
+**1. Intake.** Accept a batch in any mix: JD URLs and pre-made folders (a pasted JD or screenshot only as a fallback when there is no URL). Create nothing yet.
 
 **2. Triage.** One `/assess` pass over everything. **Checkpoint: present the verdicts and wait for the user's nod.** On the nod, a Skip with an existing folder is archived (`co archive <slug>`), a Skip without one is dropped, and neither is logged in the tracker.
 

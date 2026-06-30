@@ -3,6 +3,7 @@
   "permissions": {
     "allow": [
       "WebSearch",
+      "mcp__claude-in-chrome",
 
       "Edit(opportunities/**)",
       "Write(opportunities/**)",

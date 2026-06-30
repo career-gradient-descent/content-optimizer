@@ -1,6 +1,6 @@
 # Content Optimizer
 
-A per-opportunity pipeline for career-marketing artifacts. It is reductive: it selects, arranges, and polishes the candidate's real material for a specific opportunity, rather than generating new claims. Deterministic mechanics live in the `co` CLI; judgment lives in the skills and agents.
+A per-opportunity pipeline for career-marketing artifacts. It selects, arranges, and polishes the candidate's real material for a specific opportunity, rather than generating new claims. Deterministic mechanics live in the `co` CLI; judgment lives in the skills and agents.
 
 ## Vocabulary
 
@@ -8,6 +8,7 @@ A per-opportunity pipeline for career-marketing artifacts. It is reductive: it s
 - **Opportunity**: a specific demand being pursued, usually a job opening. The unit of work.
 - **Job description (JD)**: the verbatim, ground-truth text of an opportunity's posting.
 - **Recon**: decision-relevant intel gathered about an opportunity and its organisation to inform its artifacts.
+- **Research identity**: the isolated browser persona (its own profile and signed-in accounts) that recon uses to gather intel; never the candidate's real accounts or network.
 - **Signal**: a recon finding that informs an artifact decision, expressed as a fact, never as an instruction on how to write.
 - **Target**: an outreach recipient or channel identified by recon (a person, a post, an email).
 - **Artifact**: anything the pipeline produces for an opportunity to submit or act on: resume, cover letter, application answers, outreach actions.
@@ -15,7 +16,7 @@ A per-opportunity pipeline for career-marketing artifacts. It is reductive: it s
 
 ## The opportunity folder
 
-Every opportunity lives at `opportunities/<organisation>/<opportunity>/`, always nested. The folder is the pursuit's source of truth, held on disk rather than in conversation. A fully-populated pursuit:
+Every opportunity lives at `opportunities/<organisation>/<opportunity>/`. The folder is the pursuit's source of truth, held on disk rather than in conversation. A fully-populated pursuit:
 
 ```
 opportunities/
