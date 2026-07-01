@@ -57,7 +57,7 @@
 <@ endif @>
 %----------RECIPIENT (OPTIONAL)----------
 <@ if recipient_name or recipient_title @>
-\textbf{<@ if recipient_name @><<recipient_name|escape_latex>><@ endif @><@ if recipient_title @><@ if recipient_name @>, <@ endif @><<recipient_title|escape_latex>><@ endif @>}<@ if company @>\\<@ endif @>
+\textbf{<@ if recipient_name @><<recipient_name|escape_latex>><@ endif @><@ if recipient_title @><@ if recipient_name @>, <@ endif @><<recipient_title|escape_latex>><@ endif @>}\\
 <@ endif @>
 <@ if company @>
 <<company|escape_latex>>

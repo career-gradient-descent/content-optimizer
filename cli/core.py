@@ -53,7 +53,7 @@ def populate_jinja_template(data: dict, entity: str, template: str = "primary") 
         comment_start_string ="<#",
         comment_end_string   ="#>",
     )
-    env.filters["escape_latex"] = escape_latex
+    env.filters["escape_latex"] = lambda value: "" if value is None else escape_latex(value)
     env.filters["bold_substring"] = _bold_substring
 
     return env.get_template(f"{template}.tex.j2").render(validated.model_dump())

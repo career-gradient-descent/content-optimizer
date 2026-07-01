@@ -83,11 +83,7 @@
 % so the block contributes no layout footprint regardless of remaining page space.
 \newcommand{\atsKeywords}[1]{\smash{\rlap{\pdfrender{TextRenderingMode=3}\parbox{\linewidth}{#1}}}}
 
-\newcommand{\resumeItem}[1]{
-  \item\small{
-    {#1 \vspace{-2pt}}
-  }
-}
+\newcommand{\resumeItem}[1]{\item\small{{#1 \vspace{-2pt}}}}
 
 \newcommand{\resumeSubheading}[4]{
   \needspace{5\baselineskip}%
@@ -95,21 +91,21 @@
     \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
       \textbf{#1} & #2 \\
       \textit{\small#3} & \textit{\small #4} \\
-    \end{tabular*}\vspace{-4pt}
+    \end{tabular*}\vspace{-4pt}%
 }
 
 \newcommand{\resumeSubSubheading}[2]{
     \item
     \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
       \textit{\small#1} & \textit{\small #2} \\
-    \end{tabular*}\vspace{-7pt}
+    \end{tabular*}\vspace{-7pt}%
 }
 
 \newcommand{\resumeProjectHeading}[2]{
     \item
     \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
       \small#1 & #2 \\
-    \end{tabular*}\vspace{-7pt}
+    \end{tabular*}\vspace{-7pt}%
 }
 
 \newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
@@ -202,7 +198,7 @@
             \resumeItem{<<bullet|escape_latex>>}
             <@ endfor @>
           \resumeItemListEnd
-          <@ else @>
+          <@ elif project.description @>
           \resumeItemListStart
             \resumeItem{<<project.description|escape_latex>>}
           \resumeItemListEnd
